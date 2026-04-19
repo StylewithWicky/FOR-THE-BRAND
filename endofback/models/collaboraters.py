@@ -9,5 +9,6 @@ class Mamorio(SQLModel, table=True):
     email:str
     phone:str
     location:str
+    sku:str
     profile_picture_url:Optional[str] = Field(default=None)
     

@@ -9,6 +9,7 @@ class Mzee(SQLModel, table=True):
     hashed_password:str
     email:str
     phone:str
+    sku:str
     is_admin:bool = Field(default=False)
     is_active:bool = Field(default=True)
     

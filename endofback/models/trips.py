@@ -15,6 +15,7 @@ class Matrip(SQLModel,table=True):
     capacity:Optional[int]
     public_rating:Optional[float]
     image_url:Optional[str] = Field(default=None)
+    sku:str
     
 
     
