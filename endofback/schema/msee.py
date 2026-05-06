@@ -1,24 +1,23 @@
-from pydantic import BaseModel, ConfigDict, f
+from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Optional 
 
 class MzeeBase(BaseModel):
     name:str
     age:int
-    hashed_password:str
-    email:str
+    email:EmailStr
     phone:str
     is_admin:bool 
     is_active:bool 
     model_config = ConfigDict(from_attributes=True)
     
-class MerchCreate(MzeeBase):
-    pass
+class MzeeCreate(MzeeBase):
+    password:str
 
-class MerchSchema(MzeeBase):
+class MzeeSchema(MzeeBase):
     
     id: int
     
-class MerchUpdate(MzeeBase):
+class MzeeUpdate(MzeeBase):
     name:Optional[str]
     age:Optional[int]
     hashed_password:Optional[str]
