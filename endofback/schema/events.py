@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, f
-from typing import Optional 
+from typing import Optional ,List
 from datetime import date
 
 class MashereheBase(BaseModel):
@@ -7,7 +7,7 @@ class MashereheBase(BaseModel):
     description: str
     date: Optional[date]
     location: str
-    activities: str
+    activities: List[str]
     price: float
     public_rating: float
     image_url: str 
@@ -25,7 +25,7 @@ class MashereheUpdate(MashereheBase):
     description: Optional[str]
     date: Optional[date]
     location:Optional[str]
-    activities: Optional[str]
+    activities: Optional[List[str]]
     price: Optional[float]
     public_rating: Optional[float]
     image_url: Optional[str] 
