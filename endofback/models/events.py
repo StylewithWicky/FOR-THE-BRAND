@@ -11,5 +11,5 @@ class Sherehe(SQLModel , table=True):
     activities: Optional[List[str]] = Field(default=None, sa_column_kwargs={"type_": "ARRAY(TEXT)"})
     price: Optional[float]
     public_rating: Optional[float]
-    sku=str
+    sku:Optional[str]
     image_url: Optional[str] = Field(default=None)
