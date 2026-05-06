@@ -11,7 +11,7 @@ from schema.msee import MzeeCreate , MzeeSchema , MzeeUpdate
 
 router=APIRouter(prefix="/auth", tags=["Authentication"])
 
-@router.post("/register", response_model=MzeeOut)
+@router.post("/register", response_model=MzeeCreate)
 def register_mzee(user_in: MzeeCreate, session: Session = Depends(get_session)):
     if session.exec(select(Mzee).where(Mzee.email == user_in.email)).first():
         raise HTTPException(status_code=400, detail="Mzee already exists")
@@ -28,16 +28,15 @@ def register_mzee(user_in: MzeeCreate, session: Session = Depends(get_session)):
     session.refresh(new_mzee)
     return new_mzee
 
+@router.post("login" , response_model=Token)
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+    statement = select(Mzee).where(Mzee.username == form_data.username)
+    mzee = session.exec(statement).first()
 
-@router.post("/login",response_model=Token)
-def login_for_access_token(form.data:OAuth2PasswordRequestForm= Depends(),session :Session =Depends(get_session)):
-    statement=select(Mzee).where(Mzee.username ==form_data.username)
-    Mzee=session.exec(statement.first())
-    
-    if not Mzee or not verify_password(form_data.password, Mzee.hashed_password):
+    if not mzee or not verify_password(form_data.password, mzee.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
-            headers={"WWW-Authenticate":"Bearer"}
+            headers={"WWW-Authenticate": "Bearer"}
         )
-    
+ 
