@@ -15,7 +15,7 @@ class Token(BaseModel):
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-@router.post("/register", response_model=MzeeOut)
+@router.post("/register", response_model=MzeeSchema)
 def register_mzee(user_in: MzeeCreate, session: Session = Depends(get_session)):
     if session.exec(select(Mzee).where(Mzee.email == user_in.email)).first():
         raise HTTPException(status_code=400, detail="Mzee already exists")
@@ -35,7 +35,7 @@ def register_mzee(user_in: MzeeCreate, session: Session = Depends(get_session)):
 
 
 @router.post("/login",response_model=Token)
-def login_for_access_token(form.data:OAuth2PasswordRequestForm= Depends(),session :Session =Depends(get_session)):
+def login_for_access_token(form_data:OAuth2PasswordRequestForm= Depends(),session :Session =Depends(get_session)):
     statement=select(Mzee).where(Mzee.username ==form_data.username)
     Mzee=session.exec(statement.first())
     
@@ -45,4 +45,10 @@ def login_for_access_token(form.data:OAuth2PasswordRequestForm= Depends(),sessio
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
+    access_token_expires = timedelta(minutes=30)
+    access_token = create_access_token(
+        data={"sub": Mzee.username},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
