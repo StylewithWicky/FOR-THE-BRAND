@@ -7,8 +7,8 @@ class Merch(SQLModel, table=True):
     name:str
     description:Optional[str]
     price:float
-    discount_price:Optional[float]
-    available_stock:Optional[int]
+    discount_price:Optional[float] = Field(default=None)
+    available_stock:Optional[int] = Field(default=None)
     category:str
     image_url:Optional[str] = Field(default=None)
     sku:str

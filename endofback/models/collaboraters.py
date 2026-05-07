@@ -5,7 +5,7 @@ from datetime import date
 class Mamorio(SQLModel, table=True):
     id:Optional[int] = Field(default=None, primary_key=True)
     name:str
-    description:Optional[str]
+    description:Optional[str] = Field(default=None)
     email:str
     phone:str
     location:str

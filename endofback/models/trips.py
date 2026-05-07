@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, Field
 from typing import Optional, List
 from datetime import date
 from enum import Enum
+from sqlalchemy import Column, ARRAY, TEXT
 
 class Matrip(SQLModel,table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -10,7 +11,7 @@ class Matrip(SQLModel,table=True):
     start_date:date
     end_date:date
     location:str
-    activities: Optional[List[str]] = Field(default=None, sa_column_kwargs={"type_": "ARRAY(TEXT)"})
+    activities: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(TEXT)))
     price:Optional[float]
     capacity:Optional[int]
     public_rating:Optional[float]

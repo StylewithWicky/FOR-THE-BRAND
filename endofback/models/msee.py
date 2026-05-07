@@ -5,7 +5,7 @@ from datetime import date
 class Mzee(SQLModel, table=True):
     id:Optional[int] =Field(default=None , primary_key=True)
     name:str
-    age:Optional[int]
+    age:Optional[int] = Field(default=None)
     hashed_password:str
     email:str
     phone:str

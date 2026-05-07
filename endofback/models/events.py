@@ -9,7 +9,7 @@ class Sherehe(SQLModel , table=True):
     description: Optional[str] = Field(default=None)
     date: datetime
     location: str
-    activities: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(TEXT)), default=None)
+    activities: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(TEXT)))
     price: Optional[float]
     public_rating: Optional[float] = Field(default=None)
     sku:Optional[str] = Field(default=None)

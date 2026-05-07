@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, f
+from pydantic import BaseModel, ConfigDict
 from typing import Optional 
 
 class MerchBase(BaseModel):
