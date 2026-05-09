@@ -6,16 +6,13 @@ from models.msee import Mzee
 from auth.database import get_session # Import your session getter
 import os
 
-# Link to your login route
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/msee/login") 
-
-# Use the same keys as your security file
 SECRET_KEY = os.getenv("KEYOFSECRETS")
 ALGORITHM = os.getenv("RANDOMNUMBER")
 
 def get_current_user(
     token: str = Depends(oauth2_scheme), 
-    db: Session = Depends(get_session) # Added the dependency function here
+    db: Session = Depends(get_session) 
 ) -> Mzee:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -33,7 +30,7 @@ def get_current_user(
         raise credentials_exception
 
     # Query the user
-    user = db.exec(select(Mzee).where(Mzee.id == int(user_id))).first()
+    user = db.exec(select(Mzee).where(Mzee.email == int(user_id))).first()
     
     if user is None:
         raise credentials_exception
