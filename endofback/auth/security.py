@@ -1,26 +1,33 @@
-from typing import Union , Any
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from passlib.context import CryptContext
-from dotenv import load_dotenv,find_dotenv
+import bcrypt # Import the direct library
+from datetime import datetime, timedelta, UTC
+from jose import jwt
+from dotenv import load_dotenv, find_dotenv
 import os
 
-pwd=CryptContext(schemes=["bcrypt"], deprecated="auto")
 load_dotenv(find_dotenv())
 
+SECRET_KEY = os.getenv("KEYOFSECRETS")
+ALGORITHM = os.getenv("RANDOMNUMBER")
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 def hash_password(password: str) -> str:
-    return pwd.hash(password)
+    # Convert string to bytes
+    pwd_bytes = password.encode('utf-8')
+    # Generate salt and hash
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+    # Return as string for the database
+    return hashed.decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd.verify(plain_password, hashed_password)
+    # Convert both to bytes for comparison
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'), 
+        hashed_password.encode('utf-8')
+    )
 
-def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=int(os.getenv("Access_token_expire_minutes")))
+    expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
-    secret_key = os.getenv("Secret_key")
-    algorithm = os.getenv("Algorithm")
-    return jwt.encode(to_encode, secret_key, algorithm=algorithm)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

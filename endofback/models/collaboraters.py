@@ -1,14 +1,11 @@
 from sqlmodel import SQLModel, Field
-from typing import Optional,List
-from datetime import date 
 
 class Mamorio(SQLModel, table=True):
-    id:Optional[int] = Field(default=None, primary_key=True)
-    name:str
-    description:Optional[str] = Field(default=None)
-    email:str
-    phone:str
-    location:str
-    sku:str
-    profile_picture_url:Optional[str] = Field(default=None)
-    
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    description: str | None = Field(default=None)
+    email: str
+    phone: str
+    location: str
+    sku: str
+    profile_picture_url: str | None = Field(default=None)

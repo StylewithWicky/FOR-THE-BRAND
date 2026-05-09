@@ -1,30 +1,27 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional 
 
 class MerchBase(BaseModel):
-    name:str
-    description:Optional[str]
-    price:float
-    discount_price:Optional[float]
-    available_stock:Optional[int]
-    image_url:Optional[str]
-    category:str
+    name: str
+    description: str | None = None
+    price: float
+    discount_price: float | None = None
+    available_stock: int | None = None
+    image_url: str | None = None
+    category: str
     model_config = ConfigDict(from_attributes=True)
     
 class MerchCreate(MerchBase):
     pass
 
 class MerchSchema(MerchBase):
-    
     id: int
     
-class MerchUpdate(MerchBase):
-    name:Optional[str]
-    description:Optional[str]
-    price:Optional[float]
-    discount_price:Optional[float]
-    available_stock:Optional[int]
-    image_url:Optional[str]
-    category:Optional[str]
+class MerchUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    price: float | None = None
+    discount_price: float | None = None
+    available_stock: int | None = None
+    image_url: str | None = None
+    category: str | None = None
     model_config = ConfigDict(from_attributes=True)
-    

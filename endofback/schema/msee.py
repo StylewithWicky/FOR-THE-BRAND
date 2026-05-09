@@ -1,28 +1,28 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
-from typing import Optional 
 
 class MzeeBase(BaseModel):
-    name:str
-    age:int
-    email:EmailStr
-    phone:str
-    is_admin:bool 
-    is_active:bool 
+    name: str
+    age: int
+    email: EmailStr
+    phone: str
+    sku: str | None = None
+    is_admin: bool =False 
+    is_active: bool = True
     model_config = ConfigDict(from_attributes=True)
     
 class MzeeCreate(MzeeBase):
-    password:str
+    password: str
 
 class MzeeSchema(MzeeBase):
-    
     id: int
     
-class MzeeUpdate(MzeeBase):
-    name:Optional[str]
-    age:Optional[int]
-    hashed_password:Optional[str]
-    email:Optional[str]
-    phone:Optional[str]
-    is_admin:Optional[bool] 
-    is_active:Optional[bool]
+class MzeeUpdate(BaseModel):
+    name: str | None = None
+    age: int | None = None
+    hashed_password: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    sku: str | None = None
+    is_admin: bool | None = None 
+    is_active: bool | None = None
     model_config = ConfigDict(from_attributes=True)

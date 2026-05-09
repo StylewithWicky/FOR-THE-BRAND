@@ -1,26 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from typing import List, Optional
+from typing import List
 from models.trips import Matrip
 from schema.trips import MatripCreate, MatripSchema, MatripUpdate
 from auth.database import get_session
 from auth.deps import get_current_user
 from models.msee import Mzee
 
-router = APIRouter(prefix="/trips", tags=["Matrips (Trips & Bookings)"])
-
-
+router = APIRouter()
 
 @router.get("/", response_model=List[MatripSchema])
 def list_trips(
-    location: Optional[str] = None,
+    location: str | None = None, # Modern pipe syntax
     offset: int = 0, 
     limit: int = 20, 
     session: Session = Depends(get_session)
 ):
-   
     statement = select(Matrip)
     if location:
+        # Case-insensitive search for better UX
         statement = statement.where(Matrip.location.contains(location))
     
     return session.exec(statement.offset(offset).limit(limit)).all()
@@ -32,15 +30,12 @@ def get_trip_details(trip_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Trip not found")
     return trip
 
-
-
 @router.post("/", response_model=MatripSchema, status_code=status.HTTP_201_CREATED)
 def create_new_trip(
     trip_in: MatripCreate, 
     session: Session = Depends(get_session),
     current_user: Mzee = Depends(get_current_user)
 ):
-   
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -60,7 +55,6 @@ def update_trip(
     session: Session = Depends(get_session),
     current_user: Mzee = Depends(get_current_user)
 ):
-    
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Not authorized")
         
@@ -76,3 +70,20 @@ def update_trip(
     session.commit()
     session.refresh(db_trip)
     return db_trip
+
+@router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_trip(
+    trip_id: int, 
+    session: Session = Depends(get_session),
+    current_user: Mzee = Depends(get_current_user)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Only admins can remove trips")
+        
+    trip = session.get(Matrip, trip_id)
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+        
+    session.delete(trip)
+    session.commit()
+    return None

@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from typing import List
+# Removed Optional from typing
+from typing import List 
 from models.events import Sherehe
 from schema.events import MashereheCreate, MashereheSchema, MashereheUpdate
 from auth.database import get_session
-from auth.deps import get_current_user #
+from auth.deps import get_current_user 
 from models.msee import Mzee
 
-router = APIRouter(prefix="/sherehe", tags=["Sherehe (Events)"])
-
+router = APIRouter()
 
 @router.get("/", response_model=List[MashereheSchema])
 def read_events(
@@ -16,7 +16,6 @@ def read_events(
     limit: int = 20, 
     session: Session = Depends(get_session)
 ):
-    
     return session.exec(select(Sherehe).offset(offset).limit(limit)).all()
 
 @router.get("/{event_id}", response_model=MashereheSchema)
@@ -26,14 +25,13 @@ def read_event(event_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Sherehe not found")
     return event
 
-
-
 @router.post("/", response_model=MashereheSchema, status_code=status.HTTP_201_CREATED)
 def create_event(
     event_in: MashereheCreate, 
     session: Session = Depends(get_session),
     current_user: Mzee = Depends(get_current_user) 
 ):
+    # Authorization check
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
@@ -57,7 +55,7 @@ def update_event(
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
     
-   
+    # exclude_unset=True ensures we only update fields sent by the frontend
     update_data = event_in.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_event, key, value)
@@ -68,7 +66,14 @@ def update_event(
     return db_event
 
 @router.delete("/{event_id}")
-def delete_event(event_id: int, session: Session = Depends(get_session)):
+def delete_event(
+    event_id: int, 
+    session: Session = Depends(get_session),
+    current_user: Mzee = Depends(get_current_user) # Added auth here too for safety
+):
+    if not current_user.is_admin:
+         raise HTTPException(status_code=403, detail="Only admins can delete")
+
     event = session.get(Sherehe, event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")

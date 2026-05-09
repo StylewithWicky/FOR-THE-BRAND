@@ -1,17 +1,16 @@
-from sqlmodel import SQLModel , Field
-from typing import Optional,List
-from datetime import datetime 
+from sqlmodel import SQLModel, Field
+from typing import List
+import datetime 
 from sqlalchemy import Column, ARRAY, TEXT
 
-class Sherehe(SQLModel , table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class Sherehe(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
     name: str
-    description: Optional[str] = Field(default=None)
-    date: datetime
+    description: str | None = Field(default=None)
+    date: datetime.datetime 
     location: str
-    activities: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(TEXT)))
-    price: Optional[float]
-    public_rating: Optional[float] = Field(default=None)
-    sku:Optional[str] = Field(default=None)
-    image_url: Optional[str] = Field(default=None)
- 
+    activities: List[str] | None = Field(default=None, sa_column=Column(ARRAY(TEXT)))
+    price: float | None = Field(default=None)
+    public_rating: float | None = Field(default=None)
+    sku: str | None = Field(default=None)
+    image_url: str | None = Field(default=None)

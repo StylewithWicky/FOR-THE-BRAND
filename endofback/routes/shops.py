@@ -1,25 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from typing import List, Optional
-
+from typing import List
 from models.shop import Merch
 from schema.shop import MerchCreate, MerchSchema, MerchUpdate
 from auth.database import get_session
 from auth.deps import get_current_user
 from models.msee import Mzee
 
-router = APIRouter(prefix="/shop", tags=["Merchandise"])
-
-
+router = APIRouter()
 
 @router.get("/", response_model=List[MerchSchema])
 def list_merchandise(
-    category: Optional[str] = None,
+    category: str | None = None, # Modern syntax
     offset: int = 0, 
     limit: int = 30, 
     session: Session = Depends(get_session)
 ):
- 
     statement = select(Merch)
     if category:
         statement = statement.where(Merch.category == category)
@@ -33,18 +29,14 @@ def get_item(item_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-
-
 @router.post("/", response_model=MerchSchema, status_code=status.HTTP_201_CREATED)
 def add_new_item(
     item_in: MerchCreate, 
     session: Session = Depends(get_session),
     current_user: Mzee = Depends(get_current_user)
 ):
-   
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin privileges required")
-    
     
     new_item = Merch.model_validate(item_in)
     session.add(new_item)
@@ -59,7 +51,6 @@ def update_stock_or_price(
     session: Session = Depends(get_session),
     current_user: Mzee = Depends(get_current_user)
 ):
-   
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Operation not permitted")
         
@@ -75,3 +66,20 @@ def update_stock_or_price(
     session.commit()
     session.refresh(db_item)
     return db_item
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_merch_item(
+    item_id: int, 
+    session: Session = Depends(get_session),
+    current_user: Mzee = Depends(get_current_user)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Unauthorized: Admin access required")
+        
+    item = session.get(Merch, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+        
+    session.delete(item)
+    session.commit()
+    return None

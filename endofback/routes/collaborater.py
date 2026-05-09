@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from typing import List, Optional
+from typing import List
 from models.collaboraters import Mamorio
 from schema.collaboraters import CollaboraterCreate, CollaboraterSchema, CollaboraterUpdate
 from auth.database import get_session
 from auth.deps import get_current_user
 from models.msee import Mzee
 
-router = APIRouter(prefix="/collaborators", tags=["Collaborators (Mamorio)"])
-
-
+router = APIRouter()
 
 @router.get("/", response_model=List[CollaboraterSchema])
 def list_collaborators(
@@ -17,7 +15,6 @@ def list_collaborators(
     limit: int = 20, 
     session: Session = Depends(get_session)
 ):
-    
     return session.exec(select(Mamorio).offset(offset).limit(limit)).all()
 
 @router.get("/{collab_id}", response_model=CollaboraterSchema)
@@ -27,15 +24,12 @@ def get_collaborator(collab_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Collaborator not found")
     return collab
 
-
-
 @router.post("/", response_model=CollaboraterSchema, status_code=status.HTTP_201_CREATED)
 def add_collaborator(
     collab_in: CollaboraterCreate, 
     session: Session = Depends(get_session),
     current_user: Mzee = Depends(get_current_user)
 ):
-    
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -59,7 +53,6 @@ def update_collaborator(
     session: Session = Depends(get_session),
     current_user: Mzee = Depends(get_current_user)
 ):
-
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Unauthorized")
         
@@ -67,6 +60,7 @@ def update_collaborator(
     if not db_collab:
         raise HTTPException(status_code=404, detail="Collaborator not found")
     
+    # exclude_unset=True is key for PATCH requests
     update_data = collab_in.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_collab, key, value)
@@ -76,4 +70,19 @@ def update_collaborator(
     session.refresh(db_collab)
     return db_collab
 
-#doing this to merge to the main branch 
+@router.delete("/{collab_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_collaborator(
+    collab_id: int, 
+    session: Session = Depends(get_session),
+    current_user: Mzee = Depends(get_current_user)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+        
+    collab = session.get(Mamorio, collab_id)
+    if not collab:
+        raise HTTPException(status_code=404, detail="Collaborator not found")
+        
+    session.delete(collab)
+    session.commit()
+    return None

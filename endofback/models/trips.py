@@ -1,22 +1,21 @@
 from sqlmodel import SQLModel, Field
-from typing import Optional, List
-from datetime import date
-from enum import Enum
+from typing import List
+import datetime
 from sqlalchemy import Column, ARRAY, TEXT
 
-class Matrip(SQLModel,table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name:str
-    description:Optional[str]
-    start_date:date
-    end_date:date
-    location:str
-    activities: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(TEXT)))
-    price:Optional[float]
-    capacity:Optional[int]
-    public_rating:Optional[float]
-    image_url:Optional[str] = Field(default=None)
-    sku:str
+class Matrip(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    description: str | None = Field(default=None)
+    start_date: datetime.date
+    end_date: datetime.date
+    location: str
+    activities: List[str] | None = Field(default=None, sa_column=Column(ARRAY(TEXT)))
+    price: float | None = Field(default=None)
+    capacity: int | None = Field(default=None)
+    public_rating: float | None = Field(default=None)
+    image_url: str | None = Field(default=None)
+    sku: str
     
 
     
