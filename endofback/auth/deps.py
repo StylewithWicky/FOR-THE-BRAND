@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlmodel import Session, select
 from models.msee import Mzee
-from auth.database import get_session # Import your session getter
+from auth.database import get_session 
 import os
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/msee/login") 
@@ -30,7 +30,7 @@ def get_current_user(
         raise credentials_exception
 
     # Query the user
-    user = db.exec(select(Mzee).where(Mzee.email == int(user_id))).first()
+    user = db.exec(select(Mzee).where(Mzee.email == user_id)).first()
     
     if user is None:
         raise credentials_exception
