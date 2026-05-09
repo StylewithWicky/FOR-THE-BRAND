@@ -1,6 +1,6 @@
 import { useState } from "react";
-import AuthForm from "../components/AuthForm";
-import { s } from "../components/Auth.styles";
+import AuthForm from "../components/LoginForm"
+import { s } from "../styles/Hub.css"
 import { DollarSign, Calendar, Truck, ShieldCheck } from "lucide-react";
 
 export default function AdminPage() {
