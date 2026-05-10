@@ -1,3 +1,4 @@
+from shlex import split
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
@@ -7,6 +8,9 @@ from auth.security import hash_password, verify_password, create_access_token
 from auth.database import get_session
 from schema.msee import MzeeCreate, MzeeSchema
 from pydantic import BaseModel
+import datetime
+from dotenv import load_dotenv, find_dotenv
+import os
 
 class Token(BaseModel):
     access_token: str
@@ -15,6 +19,10 @@ class Token(BaseModel):
     email: str 
 
 router = APIRouter()
+
+load_dotenv(find_dotenv())
+
+ADMIN_EMAIL=os.getenv("ADMIN_EMAIL"),split(",")  # Split the string into a list of emails
 
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)
 def register_mzee(user_in: MzeeCreate, session: Session = Depends(get_session)):
@@ -71,3 +79,24 @@ def login_for_access_token(
         "role": user_role,
         "email": user_record.email
     }
+    from datetime import datetime
+from fastapi import APIRouter, HTTPException
+
+router = APIRouter()
+
+@router.post("/auth/login")
+async def login(email: str):
+    if email not in ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Unauthorized Access")
+
+    # TRACEABILITY: Record the entry
+    log_entry = {
+        "email": email,
+        "action": "TERMINAL_ENTRY",
+        "timestamp": datetime.now(),
+        "status": "SUCCESS"
+    }
+   
+    print(f"LOG: {email} accessed the terminal at {log_entry['timestamp']}")
+
+    return {"message": "Welcome to YOLO Connect", "token": "your_jwt_token"}
