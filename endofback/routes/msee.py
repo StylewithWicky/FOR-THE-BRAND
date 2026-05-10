@@ -62,7 +62,7 @@ def login_for_access_token(
         expires_delta=access_token_expires
     )
     
-    user_role = "admin" if getattr(user_record, 'is_superuser', False) else "user"
+    user_role = "admin" if getattr(user_record, 'is_admin', False) else "user"
 
     # 5. Return everything to the React frontend
     return {
