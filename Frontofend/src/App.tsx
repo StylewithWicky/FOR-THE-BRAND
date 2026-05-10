@@ -35,9 +35,9 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={
+        <Route path="/kudonjo" element={
           user?.loggedIn ? (
-            <Navigate to={user.role === 'admin' ? "/admin" : "/dashboard"} replace />
+            <Navigate to={user.role === 'admin' ? "/yolo/jadong" : "/dashboard"} replace />
           ) : (
             <AuthLayout title="YOLO Connect" subtitle="Sign in to your portal">
               <LoginForm onSuccess={handleLoginSuccess} />
@@ -46,11 +46,11 @@ export default function App() {
         } />
         
         {/* Protected Admin Route */}
-        <Route path="/admin" element={
-          user?.role === 'admin' ? <AdminHub /> : <Navigate to="/login" replace />
+        <Route path="/yolo/jadong" element={
+          user?.role === 'admin' ? <AdminHub /> : <Navigate to="/kudonjo" replace />
         } />
 
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/kudonjo" replace />} />
       </Routes>
     </Router>
   );
