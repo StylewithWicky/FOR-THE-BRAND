@@ -1,25 +1,29 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Home, Users, Settings, Calendar, History, DollarSign, Truck, ShoppingCart, ArrowUpRight, Bell, Search } from "lucide-react";
 
 export default function AdminHub() {
+  const navigate = useNavigate();
+
   return (
     <div className="flex h-screen w-full bg-[#050505] text-white overflow-hidden font-sans selection:bg-[#1A73E8]/30">
       
       <aside className="w-64 border-r border-white/[0.03] flex flex-col p-10 z-50 bg-black/20 backdrop-blur-2xl">
         <div className="flex items-center gap-3 mb-20 group cursor-pointer">
           <div className="w-1 h-10 bg-[#1A73E8] group-hover:shadow-[0_0_20px_#1A73E8] transition-all duration-500" />
-          <img src="/image/YOLO.png"
-      alt="YOLO Connect" 
-      className="w-20 h-auto transition-all duration-500 drop-shadow-[0_0_8px_rgba(26,115,232,0.2)] group-hover:drop-shadow-[0_0_20px_rgba(26,115,232,0.5)] group-hover:scale-105"
-    />
-    <p className="text-[8px] font-black tracking-[0.4em] text-zinc-600 uppercase group-hover:text-zinc-400 transition-colors">
-      ONLIKEMF-os
-    </p>
+          <img 
+            src="/image/YOLO.png"
+            alt="YOLO Connect" 
+            className="w-20 h-auto transition-all duration-500 drop-shadow-[0_0_8px_rgba(26,115,232,0.2)] group-hover:drop-shadow-[0_0_20px_rgba(26,115,232,0.5)] group-hover:scale-105"
+          />
+          <p className="text-[8px] font-black tracking-[0.4em] text-zinc-600 uppercase group-hover:text-zinc-400 transition-colors">
+            ONLIKEMF-os
+          </p>
         </div>
 
         <nav className="space-y-8 flex-1">
-          <NavItem icon={<Home size={18} />} label="Terminal" active />
-          <NavItem icon={<Users size={18} />} label="Personnel" />
+          <NavItem icon={<Home size={18} />} label="Terminal" active onClick={() => navigate('/a1/mdosi/kejayamkuu')} />
+          <NavItem icon={<Users size={18} />} label="Personnel" onClick={() => navigate('/a1/mdosi/personnel')} />
           <NavItem icon={<Calendar size={18} />} label="Logbook" />
           <NavItem icon={<History size={18} />} label="Archive" />
         </nav>
@@ -29,17 +33,15 @@ export default function AdminHub() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 p-20 overflow-y-auto custom-scrollbar studio-bg">
         
-        {/* HEADER - "Believe" Energy */}
         <header className="flex justify-between items-end mb-24">
           <div>
             <p className="text-[#1A73E8] text-[9px] font-black tracking-[0.5em] uppercase mb-6 opacity-50">
               ALWAYS FOR THE BRAND
             </p>
             <h1 className="text-7xl font-black tracking-tighter leading-none mb-2">
-             WaGwAn WaDaU!!
+              WaGwAn WaDaU!!
             </h1>
             <div className="h-[2px] w-24 bg-[#1A73E8] mt-4" />
           </div>
@@ -53,7 +55,6 @@ export default function AdminHub() {
           </div>
         </header>
 
-        {/* THE GRID - High Contrast */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl">
           
           <ModuleCard 
@@ -90,12 +91,15 @@ export default function AdminHub() {
   );
 }
 
-function NavItem({ icon, label, active = false }: any) {
+function NavItem({ icon, label, active = false, onClick }: any) {
   return (
-    <div className={`
-      flex items-center gap-5 cursor-pointer transition-all duration-500 group
-      ${active ? 'text-white' : 'text-zinc-600 hover:text-zinc-300'}
-    `}>
+    <div 
+      onClick={onClick}
+      className={`
+        flex items-center gap-5 cursor-pointer transition-all duration-500 group
+        ${active ? 'text-white' : 'text-zinc-600 hover:text-zinc-300'}
+      `}
+    >
       <span className={`${active ? 'text-[#1A73E8]' : 'group-hover:text-white transition-colors'}`}>{icon}</span>
       <span className="text-[10px] font-bold tracking-[0.3em] uppercase">{label}</span>
     </div>
@@ -106,7 +110,6 @@ function ModuleCard({ title, desc, icon, accent }: any) {
   return (
     <div className="group relative bg-gradient-to-br from-[#0A0A0A] to-[#050505] border border-white/[0.03] p-12 rounded-sm transition-all duration-700 hover:border-white/[0.08] cursor-pointer overflow-hidden">
       
-      {/* The Signature "Vibe Line" */}
       <div className="absolute left-0 top-0 w-[2px] h-0 group-hover:h-full transition-all duration-700 shadow-[0_0_15px]" style={{ backgroundColor: accent, boxShadow: `0 0 15px ${accent}` }} />
 
       <div className="flex justify-between items-start mb-16">
@@ -125,8 +128,8 @@ function ModuleCard({ title, desc, icon, accent }: any) {
         </p>
       </div>
 
-      {/* Background Accent - Very subtle */}
       <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full blur-[100px] opacity-0 group-hover:opacity-10 transition-opacity duration-1000" style={{ backgroundColor: accent }} />
     </div>
   );
 }
+ 
