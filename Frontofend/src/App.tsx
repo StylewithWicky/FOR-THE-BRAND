@@ -3,8 +3,10 @@ import { useState, ReactNode } from 'react';
 import axios from 'axios';
 import LoginForm from './components/LoginForm';
 import AdminHub from './Pages/AdminHub';
+import Personnel from './Pages/Personnel';
 import { s } from './styles/Auth.styles';
 import type { AuthValues } from './lib/auth-schema';
+import { TraceProvider } from './context/TraceProvider';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -28,7 +30,6 @@ export default function App() {
   const [user, setUser] = useState<{ loggedIn: boolean; role: string; email: string } | null>(null);
 
   const handleLoginSuccess = async (data: AuthValues) => {
-    console.log("Login starting")
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
       const formData = new URLSearchParams();
@@ -38,9 +39,11 @@ export default function App() {
       const response = await axios.post(`${apiUrl}/msee/login`, formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
-      console.log("Full Backend Data:", response.data);
-      const { access_token, role ,email } = response.data;
+
+      const { access_token, role, email } = response.data;
       localStorage.setItem('yolo_token', access_token);
+      localStorage.setItem('yolo_email', email);
+      
       setUser({ loggedIn: true, role: role, email: email });
       
     } catch (err) {
@@ -51,24 +54,31 @@ export default function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/kudonjo" element={
-  user?.loggedIn ? (
-    user.role === 'admin' 
-      ? <Navigate to="/a1/mdosi/kejayamkuu" replace /> 
-      : <Navigate to="/access-denied" replace /> 
-  ) : (
-    <AuthLayout title="YOLO Connect" subtitle="Authorization Required">
-      <LoginForm onSuccess={handleLoginSuccess} />
-    </AuthLayout>
-  )
-} />
+      <TraceProvider>
+        <Routes>
+          <Route path="/kudonjo" element={
+            user?.loggedIn ? (
+              user.role === 'admin' 
+                ? <Navigate to="/a1/mdosi/kejayamkuu" replace /> 
+                : <Navigate to="/access-denied" replace /> 
+            ) : (
+              <AuthLayout title="YOLO Connect" subtitle="Authorization Required">
+                <LoginForm onSuccess={handleLoginSuccess} />
+              </AuthLayout>
+            )
+          } />
 
-        <Route path="/a1/mdosi/kejayamkuu" element={
-          user?.role === 'admin' ? <AdminHub /> : <Navigate to="/kudonjo" replace />
-        } />
-        <Route path="/" element={<Navigate to="/kudonjo" replace />} />
-      </Routes>
+          <Route path="/a1/mdosi/kejayamkuu" element={
+            user?.role === 'admin' ? <AdminHub /> : <Navigate to="/kudonjo" replace />
+          } />
+
+          <Route path="/a1/mdosi/personnel" element={
+            user?.role === 'admin' ? <Personnel /> : <Navigate to="/kudonjo" replace />
+          } />
+
+          <Route path="/" element={<Navigate to="/kudonjo" replace />} />
+        </Routes>
+      </TraceProvider>
     </Router>
   );
 }
