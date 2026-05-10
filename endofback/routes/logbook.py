@@ -2,9 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select, and_
 from datetime import datetime, timedelta
 from typing import List, Optional
-
 from auth.database import get_session
-from auth.security import get_current_user
+from auth.deps import get_current_user
 from models.logbook import LogEntry
 from schema.logbook import LogEntryCreate, LogEntryRead
 
