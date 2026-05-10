@@ -1,7 +1,7 @@
 import { useState } from "react";
 import AuthForm from "../components/LoginForm";
 import { s } from "../styles/Auth.styles"
-import { DollarSign, Calendar, Truck, ArrowRight, ShieldCheck } from "lucide-react";
+import { DollarSign, Calendar, Truck, ArrowRight, ShoppingCart } from "lucide-react";
 
 export default function AdminHub() {
   return (
@@ -10,21 +10,22 @@ export default function AdminHub() {
         <header className="mb-16 mt-8 flex justify-between items-end">
           <div>
             <p className="text-[#1A73E8] font-black tracking-[0.4em] uppercase text-[9px] mb-3 flex items-center gap-2">
-              <ShieldCheck size={12} /> System Status: Online
+              <ShoppingCart size={12} /> System Status: Online
             </p>
             <h1 className="text-6xl font-black tracking-tighter text-white">
               Mkubwa <span className="bg-gradient-to-r from-[#1A73E8] to-[#FF6B00] bg-clip-text text-transparent">Terminal</span>
             </h1>
           </div>
           <div className="text-right pb-2">
-             <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">Maitai Farm Operations</p>
+             <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">YOLO OPERATIONS </p>
           </div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <ModuleCard title="Finance" desc="Revenue & Invoicing" icon={<DollarSign />} accent="#10b981" />
-          <ModuleCard title="Fleet" desc="Rarity Car Hire" icon={<Calendar />} accent="#1A73E8" />
-          <ModuleCard title="Supply" desc="Dorper Logistics" icon={<Truck />} accent="#FF6B00" />
+          <ModuleCard title="BOOKING AND EVENTS" desc="Manage Bookings and Events" icon={<Calendar />} accent="#1A73E8" />
+          <ModuleCard title="LOGISTICS AND SCHEDULING" desc="Manage Logistics and Scheduling" icon={<Truck />} accent="#FF6B00" />
+          <ModuleCard title="SHOP AND MERCHANDISE" desc="Manage Shop and Merchandise" icon={<ShoppingCart />} accent="#8B5CF6" />
         </div>
       </div>
     </div>
