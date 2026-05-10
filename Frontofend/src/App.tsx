@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, ReactNode } from 'react'; 
+import axios from 'axios';
 import LoginForm from './components/LoginForm';
-import AdminHub from './Pages/AdminHub'; // Renamed to match your screenshot
+import AdminHub from './Pages/AdminHub';
 import { s } from './styles/Auth.styles';
 import type { AuthValues } from './lib/auth-schema';
+import { email } from 'zod';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -26,31 +28,48 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => (
 export default function App() {
   const [user, setUser] = useState<{ loggedIn: boolean; role: string } | null>(null);
 
-  const handleLoginSuccess = (data: AuthValues) => {
-    // Elite Logic: Check for admin keyword or specific farm email
-    const isAdmin = data.email.toLowerCase().includes('admin') || data.email.includes('maitai.farm');
-    setUser({ loggedIn: true, role: isAdmin ? 'admin' : 'user' });
+  const handleLoginSuccess = async (data: AuthValues) => {
+    try {
+      // Replace with your actual FOR-THE-BRAND API URL
+      const formData = new URLSearchParams();
+formData.append('username', data.email); // OAuth2 usually uses 'username' field for email
+formData.append('password', data.password);
+
+const response = await axios.post('http://localhost:8000/api/v1/msee/login', formData, {
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+});
+        
+        const { access_token, role } = response.data;
+
+      localStorage.setItem('yolo_token', access_token);
+      setUser({ loggedIn: true, role: role }); // Backend must return 'admin'
+      
+    } catch (err) {
+      console.error("Access Denied:", err);
+      alert("UNAUTHORIZED: Check credentials.");
+    }
   };
 
   return (
     <Router>
       <Routes>
-        <Route path="/kudonjo" element={
+        <Route path="/login" element={
           user?.loggedIn ? (
-            <Navigate to={user.role === 'admin' ? "/yolo/jadong" : "/dashboard"} replace />
+            <Navigate to={user.role === 'admin' ? "/yolo/mkubwa" : "/dashboard"} replace />
           ) : (
-            <AuthLayout title="YOLO Connect" subtitle="Sign in to your portal">
+            <AuthLayout title="YOLO Connect" subtitle="Authorization Required">
               <LoginForm onSuccess={handleLoginSuccess} />
             </AuthLayout>
           )
         } />
-        
-        {/* Protected Admin Route */}
-        <Route path="/yolo/jadong" element={
-          user?.role === 'admin' ? <AdminHub /> : <Navigate to="/kudonjo" replace />
+
+        <Route path="/yolo/mkubwa" element={
+          user?.role === 'admin' ? <AdminHub /> : <Navigate to="/login" replace />
         } />
 
-        <Route path="/" element={<Navigate to="/kudonjo" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
