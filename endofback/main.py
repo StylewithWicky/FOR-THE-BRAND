@@ -12,8 +12,8 @@ from models.events import Sherehe
 from models.shop import Merch
 from models.trips import Matrip
 from models.collaboraters import Mamorio
-
-from routes import msee, events, shops, trips, collaborater 
+from models.audit import AuditLog
+from routes import msee, events, shops, trips, collaborater, audit
 
 # Setup lifespan to create tables on startup
 @asynccontextmanager
@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     yield
     logging.info("Shutting down...")
 
-for model in [Mzee, Sherehe, Merch, Matrip, Mamorio]:
+for model in [Mzee, Sherehe, Merch, Matrip, Mamorio, AuditLog]:
     model.model_rebuild()
 
 logging.basicConfig(level=logging.INFO)
@@ -65,6 +65,7 @@ app.include_router(events.router, prefix="/api/v1/sherehe", tags=["Masherehe(Eve
 app.include_router(shops.router, prefix="/api/v1/merch", tags=["Merch(Shop)"])
 app.include_router(trips.router, prefix="/api/v1/trips", tags=["Matrip"])
 app.include_router(collaborater.router, prefix="/api/v1/mamorio", tags=["Mamorio(Collaborations)"])
+app.include_router(audit.router, prefix="/api/v1/trace", tags=["Security_Audit"])
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
