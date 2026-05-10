@@ -5,7 +5,7 @@ class Mzee(SQLModel, table=True):
     name: str
     age: int | None = Field(default=None)
     hashed_password: str
-    email: str
+    email: str = Field(index=True, unique=True)
     phone: str
     sku: str | None = Field(default=None, nullable=True)
     is_admin: bool = Field(default=False)
