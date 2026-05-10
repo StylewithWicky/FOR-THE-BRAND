@@ -28,27 +28,24 @@ export default function App() {
   const [user, setUser] = useState<{ loggedIn: boolean; role: string } | null>(null);
 
   const handleLoginSuccess = async (data: AuthValues) => {
+    console.log("Login starting")
     try {
-      const apiUrl = import.meta.env.VITE_API_URL
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
       const formData = new URLSearchParams();
       formData.append('username', data.email);
       formData.append('password', data.password);
 
       const response = await axios.post(`${apiUrl}/msee/login`, formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
-        
+      console.log("Full Backend Data:", response.data);
       const { access_token, role } = response.data;
-      console.log("Role Recieved:", role);
-
       localStorage.setItem('yolo_token', access_token);
       setUser({ loggedIn: true, role: role });
       
     } catch (err) {
       console.error("Access Denied:", err);
-      alert("UNAUTHORIZED: Check your access level.");
+      alert("UNAUTHORIZED: Check your Mkubwa credentials.");
     }
   };
 
@@ -56,21 +53,20 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/kudonjo" element={
-          user?.loggedIn ? (
-            <Navigate to={user.role === 'admin' ? "/mdosi" : "/dashboard"} replace />
-          ) : (
-            <AuthLayout title="YOLO Connect" subtitle="Authorization Required">
-              <LoginForm onSuccess={handleLoginSuccess} />
-            </AuthLayout>
-          )
-        } />
+  user?.loggedIn ? (
+    user.role === 'admin' 
+      ? <Navigate to="/a1/mdosi/kejayamkuu" replace /> 
+      : <Navigate to="/access-denied" replace /> // Better than /user/home for now
+  ) : (
+    <AuthLayout title="YOLO Connect" subtitle="Authorization Required">
+      <LoginForm onSuccess={handleLoginSuccess} />
+    </AuthLayout>
+  )
+} />
 
-        {/* NEW ADMIN HUB PATH: /mdosi */}
-        <Route path="/mdosi" element={
+        <Route path="/a1/mdosi/kejayamkuu" element={
           user?.role === 'admin' ? <AdminHub /> : <Navigate to="/kudonjo" replace />
         } />
-
-        {/* DEFAULT REDIRECT */}
         <Route path="/" element={<Navigate to="/kudonjo" replace />} />
       </Routes>
     </Router>
