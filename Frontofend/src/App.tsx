@@ -5,7 +5,6 @@ import LoginForm from './components/LoginForm';
 import AdminHub from './Pages/AdminHub';
 import { s } from './styles/Auth.styles';
 import type { AuthValues } from './lib/auth-schema';
-import { email } from 'zod';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -30,34 +29,35 @@ export default function App() {
 
   const handleLoginSuccess = async (data: AuthValues) => {
     try {
-      // Replace with your actual FOR-THE-BRAND API URL
+      const apiUrl = import.meta.env.VITE_API_URL
       const formData = new URLSearchParams();
-formData.append('username', data.email); // OAuth2 usually uses 'username' field for email
-formData.append('password', data.password);
+      formData.append('username', data.email);
+      formData.append('password', data.password);
 
-const response = await axios.post('http://localhost:8000/api/v1/msee/login', formData, {
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
-});
+      const response = await axios.post(`${apiUrl}/msee/login`, formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
         
-        const { access_token, role } = response.data;
+      const { access_token, role } = response.data;
+      console.log("Role Recieved:", role);
 
       localStorage.setItem('yolo_token', access_token);
-      setUser({ loggedIn: true, role: role }); // Backend must return 'admin'
+      setUser({ loggedIn: true, role: role });
       
     } catch (err) {
       console.error("Access Denied:", err);
-      alert("UNAUTHORIZED: Check credentials.");
+      alert("UNAUTHORIZED: Check your access level.");
     }
   };
 
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={
+        <Route path="/kudonjo" element={
           user?.loggedIn ? (
-            <Navigate to={user.role === 'admin' ? "/yolo/mkubwa" : "/dashboard"} replace />
+            <Navigate to={user.role === 'admin' ? "/mdosi" : "/dashboard"} replace />
           ) : (
             <AuthLayout title="YOLO Connect" subtitle="Authorization Required">
               <LoginForm onSuccess={handleLoginSuccess} />
@@ -65,11 +65,13 @@ const response = await axios.post('http://localhost:8000/api/v1/msee/login', for
           )
         } />
 
-        <Route path="/yolo/mkubwa" element={
-          user?.role === 'admin' ? <AdminHub /> : <Navigate to="/login" replace />
+        {/* NEW ADMIN HUB PATH: /mdosi */}
+        <Route path="/mdosi" element={
+          user?.role === 'admin' ? <AdminHub /> : <Navigate to="/kudonjo" replace />
         } />
 
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* DEFAULT REDIRECT */}
+        <Route path="/" element={<Navigate to="/kudonjo" replace />} />
       </Routes>
     </Router>
   );
