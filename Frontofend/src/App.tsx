@@ -25,7 +25,7 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => (
 );
 
 export default function App() {
-  const [user, setUser] = useState<{ loggedIn: boolean; role: string } | null>(null);
+  const [user, setUser] = useState<{ loggedIn: boolean; role: string; email: string } | null>(null);
 
   const handleLoginSuccess = async (data: AuthValues) => {
     console.log("Login starting")
@@ -39,9 +39,9 @@ export default function App() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
       console.log("Full Backend Data:", response.data);
-      const { access_token, role } = response.data;
+      const { access_token, role ,email } = response.data;
       localStorage.setItem('yolo_token', access_token);
-      setUser({ loggedIn: true, role: role });
+      setUser({ loggedIn: true, role: role, email: email });
       
     } catch (err) {
       console.error("Access Denied:", err);
@@ -56,7 +56,7 @@ export default function App() {
   user?.loggedIn ? (
     user.role === 'admin' 
       ? <Navigate to="/a1/mdosi/kejayamkuu" replace /> 
-      : <Navigate to="/access-denied" replace /> // Better than /user/home for now
+      : <Navigate to="/access-denied" replace /> 
   ) : (
     <AuthLayout title="YOLO Connect" subtitle="Authorization Required">
       <LoginForm onSuccess={handleLoginSuccess} />
