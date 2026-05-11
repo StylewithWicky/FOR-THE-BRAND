@@ -6,7 +6,7 @@ from models.audit import AuditLog
 from schema.audit import AuditLogCreate, AuditLogRead
 from typing import List
 
-router = APIRouter(prefix="/api/v1/trace", tags=["Security_Audit"])
+router = APIRouter()
 
 @router.post("/log", status_code=201)
 async def create_log(
