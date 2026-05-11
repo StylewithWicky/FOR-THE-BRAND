@@ -42,10 +42,10 @@ export default function Archive() {
           <div>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-1 h-12 bg-[#1A73E8] shadow-[0_0_20px_rgba(26,115,232,0.4)]" />
-              <h1 className="text-6xl font-black italic tracking-tighter uppercase">Operations_Archive</h1>
+              <h1 className="text-6xl font-black italic tracking-tighter uppercase">ARCHIVE_YA_MAOPERATIONS</h1>
             </div>
             <p className="text-[10px] text-zinc-500 font-bold tracking-[0.5em] uppercase pl-6">
-              Historical_Intelligence_&_Cost_Analysis
+              BASICALLY_NI_YA_KUCHEKI_PAST_RECORDS_AND_EXPENDITURES
             </p>
           </div>
 
