@@ -28,3 +28,14 @@ class VenueArchive(SQLModel, table=True):
     contact_number: str
     amenities: str 
     feedback: Optional[str] = None
+    
+class FinanceArchive(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    category: str  
+    transaction_type: str  
+    amount: float
+    description: str
+    reference_id: str  
+    payment_method: str # "M-PESA", "CASH", "BANK"
+    mpesa_code: Optional[str] = Field(unique=True)
