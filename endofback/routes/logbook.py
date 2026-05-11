@@ -7,7 +7,7 @@ from auth.deps import get_current_user
 from models.logbook import LogEntry
 from schema.logbook import LogEntryCreate, LogEntryRead
 
-router = APIRouter(prefix="/api/v1/logbook", tags=["Logbook"])
+router = APIRouter()
 
 @router.post("/add", response_model=LogEntryRead, status_code=status.HTTP_201_CREATED)
 async def create_log_entry(
