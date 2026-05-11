@@ -1,4 +1,4 @@
-import React, { createContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
@@ -11,11 +11,11 @@ export const TraceProvider = ({ children }: { children: React.ReactNode }) => {
     const recordTrace = async () => {
       if (email && token) {
         try {
-          // Identify the module based on the URL path
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
           const pathSegments = location.pathname.split('/').filter(Boolean);
-          const moduleName = pathSegments[0] || "Dashboard";
+          const moduleName = pathSegments[pathSegments.length - 1] || "Dashboard";
           
-          await axios.post('http://localhost:8000/api/v1/trace/log', {
+          await axios.post(`${apiUrl}/trace/log`, {
             action: "VIEW_PAGE",
             module: moduleName.toUpperCase(),
             details: `Admin navigated to ${location.pathname}`

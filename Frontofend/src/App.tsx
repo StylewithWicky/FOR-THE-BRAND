@@ -4,6 +4,7 @@ import axios from 'axios';
 import LoginForm from './components/LoginForm';
 import AdminHub from './Pages/AdminHub';
 import Personnel from './Pages/Personnel';
+import Logbook from './Pages/LogBook';
 import { s } from './styles/Auth.styles';
 import type { AuthValues } from './lib/auth-schema';
 import { TraceProvider } from './context/TraceProvider';
@@ -74,6 +75,10 @@ export default function App() {
 
           <Route path="/a1/mdosi/personnel" element={
             user?.role === 'admin' ? <Personnel /> : <Navigate to="/kudonjo" replace />
+          } />
+
+          <Route path="/a1/mdosi/logbook" element={
+            user?.role === 'admin' ? <Logbook /> : <Navigate to="/kudonjo" replace />
           } />
 
           <Route path="/" element={<Navigate to="/kudonjo" replace />} />

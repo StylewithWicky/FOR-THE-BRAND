@@ -24,7 +24,7 @@ export default function AdminHub() {
         <nav className="space-y-8 flex-1">
           <NavItem icon={<Home size={18} />} label="Terminal" active onClick={() => navigate('/a1/mdosi/kejayamkuu')} />
           <NavItem icon={<Users size={18} />} label="Personnel" onClick={() => navigate('/a1/mdosi/personnel')} />
-          <NavItem icon={<Calendar size={18} />} label="Logbook" />
+          <NavItem icon={<Calendar size={18} />} label="Logbook" onClick={() => navigate('/a1/mdosi/logbook')} />
           <NavItem icon={<History size={18} />} label="Archive" />
         </nav>
 

@@ -7,7 +7,7 @@ import { s } from "../styles/Auth.styles"; // Consistent with your other files
 
 interface AuthFormProps {
   onSuccess: (data: AuthValues) => void;
-  buttonText?: string; // Optional: Override the default "Sign In"
+  buttonText?: string; 
 }
 
 export default function AuthForm({ onSuccess, buttonText }: AuthFormProps) {
