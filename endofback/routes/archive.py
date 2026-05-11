@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from auth.database import get_session
-from auth.security import get_current_user
+from auth.deps import get_current_user
 from models.archive import FinanceArchive, TripArchive, VenueArchive
 from typing import List
 
