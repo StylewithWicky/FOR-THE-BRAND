@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks
 from sqlmodel import Session, select
 from auth.database import get_session
-from models.madoo import MpesaTransaction, Invoice
+from models.madoo import MadooInteraction, Invoice
 from service.madoo import MpesaService
 from service.notifications import send_receipt_email  
 
@@ -30,7 +30,7 @@ async def trigger_payment_push(
     if response_code != "0":
         raise HTTPException(status_code=400, detail="Safaricom rejected the push initiation configuration.")
 
-    txn = MpesaTransaction(
+    txn = MadooInteraction(
         invoice_id=invoice_id,
         phone_number=phone_number,
         amount=amount,
@@ -60,7 +60,7 @@ async def mpesa_async_callback(
     result_desc = stk_callback.get("ResultDesc")
     checkout_id = stk_callback.get("CheckoutRequestID")
 
-    statement = select(MpesaTransaction).where(MpesaTransaction.checkout_request_id == checkout_id)
+    statement = select(MadooInteraction).where(MadooInteraction.checkout_request_id == checkout_id)
     txn = session.exec(statement).first()
 
     if not txn:
