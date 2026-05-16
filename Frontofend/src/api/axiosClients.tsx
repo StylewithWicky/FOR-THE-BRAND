@@ -10,7 +10,7 @@ const axiosClient = axios.create({
   },
 });
 
-// Request interceptor typed automatically
+
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('token');
@@ -22,7 +22,7 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Global Response interceptor tracking FastAPI back-end shapes
+
 axiosClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ detail?: string }>) => {
