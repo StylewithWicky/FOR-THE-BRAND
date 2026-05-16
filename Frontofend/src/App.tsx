@@ -1,12 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, ReactNode } from 'react'; 
-import axios from 'axios';
+import axiosClient from './api/axiosClients';
 import LoginForm from './components/LoginForm';
 import AdminHub from './Pages/AdminHub';
 import Personnel from './Pages/Personnel';
 import Logbook from './Pages/LogBook';
 import Archive from './Pages/Archive';
 import { s } from './styles/Auth.styles';
+import SystemPage from './Pages/System';
 import type { AuthValues } from './lib/auth-schema';
 import { TraceProvider } from './context/TraceProvider';
 
@@ -33,24 +34,22 @@ export default function App() {
 
   const handleLoginSuccess = async (data: AuthValues) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
       const formData = new URLSearchParams();
       formData.append('username', data.email);
       formData.append('password', data.password);
 
-      const response = await axios.post(`${apiUrl}/msee/login`, formData, {
+      const response = await axiosClient.post('/msee/login', formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
       const { access_token, role, email } = response.data;
-      localStorage.setItem('yolo_token', access_token);
+      localStorage.setItem('token', access_token);
       localStorage.setItem('yolo_email', email);
       
       setUser({ loggedIn: true, role: role, email: email });
       
     } catch (err) {
       console.error("Access Denied:", err);
-      alert("UNAUTHORIZED: Check your Mkubwa credentials.");
     }
   };
 
@@ -84,6 +83,9 @@ export default function App() {
 
           <Route path="/a1/mdosi/archive" element={
             user?.role === 'admin' ? <Archive /> : <Navigate to="/kudonjo" replace />
+          } />
+          <Route path="/a1/mdosi/system" element={
+            user?.role === 'admin' ? <SystemPage /> : <Navigate to="/kudonjo" replace />
           } />
 
           <Route path="/" element={<Navigate to="/kudonjo" replace />} />
