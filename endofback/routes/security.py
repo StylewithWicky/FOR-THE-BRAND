@@ -5,7 +5,7 @@ import redis.asyncio as redis
 from auth.deps import get_session
 from models.madoo import SecurityLogTable 
 
-router = APIRouter(prefix="/api/v1/admin/security", tags=["Admin Security Hub"])
+router = APIRouter()
 
 redis_client = redis.from_url("redis://localhost:6379", encoding="utf-8", decode_responses=True)
 
