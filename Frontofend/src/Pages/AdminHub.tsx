@@ -2,7 +2,21 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, Users, Settings, Calendar, History, DollarSign, Truck, ShoppingCart, ArrowUpRight, Bell, Search } from "lucide-react";
 
-export default function AdminHub() {
+interface NavItemProps {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}
+
+interface ModuleCardProps {
+  title: string;
+  desc: string;
+  icon: React.ReactElement<{ size?: number; strokeWidth?: number }>;
+  accent: string;
+}
+
+export default function AdminHub(): React.JSX.Element {
   const navigate = useNavigate();
 
   return (
@@ -28,7 +42,7 @@ export default function AdminHub() {
         </nav>
 
         <div className="pt-10 border-t border-white/[0.03]">
-          <NavItem icon={<Settings size={18} />} label="System" />
+          <NavItem icon={<Settings size={18} />} label="System" onClick={() => navigate('/a1/mdosi/system')} />
         </div>
       </aside>
 
@@ -87,7 +101,7 @@ export default function AdminHub() {
   );
 }
 
-function NavItem({ icon, label, active = false, onClick }: any) {
+function NavItem({ icon, label, active = false, onClick }: NavItemProps): React.JSX.Element {
   return (
     <div 
       onClick={onClick}
@@ -102,7 +116,7 @@ function NavItem({ icon, label, active = false, onClick }: any) {
   );
 }
 
-function ModuleCard({ title, desc, icon, accent }: any) {
+function ModuleCard({ title, desc, icon, accent }: ModuleCardProps): React.JSX.Element {
   return (
     <div className="group relative bg-gradient-to-br from-[#0A0A0A] to-[#050505] border border-white/[0.03] p-12 rounded-sm transition-all duration-700 hover:border-white/[0.08] cursor-pointer overflow-hidden">
       <div className="absolute left-0 top-0 w-[2px] h-0 group-hover:h-full transition-all duration-700 shadow-[0_0_15px]" style={{ backgroundColor: accent, boxShadow: `0 0 15px ${accent}` }} />
@@ -127,4 +141,3 @@ function ModuleCard({ title, desc, icon, accent }: any) {
     </div>
   );
 }
- 
