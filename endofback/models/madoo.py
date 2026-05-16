@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import Optional
 from sqlmodel import SQLModel, Field
 
-class MpesaTransaction(SQLModel, table=True):
-    __tablename__: str = "mpesatransaction"
+class MadooInteractions(SQLModel, table=True):
+    __tablename__: str = "madoo_interactions"
 
     id: Optional[int] = Field(default=None, primary_key=True)
     invoice_id: str = Field(index=True, description="Links back to your order or rental invoice")
