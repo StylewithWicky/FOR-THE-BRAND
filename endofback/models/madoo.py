@@ -31,3 +31,14 @@ class MadooInteraction(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     invoice: Optional[Invoice] = Relationship(back_populates="transactions")
+    
+    
+class SecurityLogTable(SQLModel, table=True):
+    __tablename__: str = "security_log"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    violation_type: str = Field(index=True)      
+    offending_vector: str = Field(index=True)    
+    narrative: str                               
+    mitigation_mode: str                         
+    created_at: datetime = Field(default_factory=datetime.utcnow)
