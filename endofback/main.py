@@ -17,8 +17,7 @@ from models.audit import AuditLog
 from models.logbook import LogEntry
 from models.system import SystemConfig, SecurityAudit
 from models.madoo import Invoice,  MadooInteraction
-from routes import msee, events, shops, trips, collaborater, audit ,logbook , archive , system , madoo
-
+from routes import msee, events, shops, trips, collaborater, audit ,logbook , archive , system , madoo , security
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("Creating database tables...")
@@ -73,6 +72,7 @@ app.include_router(logbook.router, prefix="/api/v1/logbook", tags=["Logbook"])
 app.include_router(archive.router, prefix="/api/v1/archive", tags=["Archive"])
 app.include_router(system.router, prefix="/api/v1/system", tags=["System & Security"])
 app.include_router(madoo.router, prefix="/api/v1/MADOO", tags=["M-Pesa Automation Layer"])
+app.include_router(security.router, prefix="/api/v1/security", tags=["Security"])
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
