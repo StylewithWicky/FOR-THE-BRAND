@@ -6,8 +6,9 @@ import AdminHub from './Pages/AdminHub';
 import Personnel from './Pages/Personnel';
 import Logbook from './Pages/LogBook';
 import Archive from './Pages/Archive';
-import { s } from './styles/Auth.styles';
 import SystemPage from './Pages/System';
+import FinancePage from './Pages/Finance';
+import { s } from './styles/Auth.styles';
 import type { AuthValues } from './lib/auth-schema';
 import { TraceProvider } from './context/TraceProvider';
 
@@ -73,6 +74,10 @@ export default function App() {
             user?.role === 'admin' ? <AdminHub /> : <Navigate to="/kudonjo" replace />
           } />
 
+          <Route path="/a1/mdosi/finance" element={
+            user?.role === 'admin' ? <FinancePage /> : <Navigate to="/kudonjo" replace />
+          } />
+
           <Route path="/a1/mdosi/personnel" element={
             user?.role === 'admin' ? <Personnel /> : <Navigate to="/kudonjo" replace />
           } />
@@ -84,6 +89,7 @@ export default function App() {
           <Route path="/a1/mdosi/archive" element={
             user?.role === 'admin' ? <Archive /> : <Navigate to="/kudonjo" replace />
           } />
+          
           <Route path="/a1/mdosi/system" element={
             user?.role === 'admin' ? <SystemPage /> : <Navigate to="/kudonjo" replace />
           } />
