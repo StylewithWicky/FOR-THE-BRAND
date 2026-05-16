@@ -15,7 +15,6 @@ class MpesaService:
         self.callback_url = os.getenv("MPESA_CALLBACK_URL")
 
     def get_access_token(self) -> str:
-        """Fetches active OAuth security access token from Safaricom endpoints"""
         url = f"{self.base_url}/oauth/v1/generate?grant_type=client_credentials"
         try:
             res = requests.get(url, auth=(self.consumer_key, self.consumer_secret), timeout=10)
