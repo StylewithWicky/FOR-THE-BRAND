@@ -1,9 +1,10 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks
 from sqlmodel import Session, select
 from auth.database import get_session
 from models.madoo import MpesaTransaction, Invoice
-from auth.madoo import MpesaService
+from service.madoo import MpesaService
+from service.notifications import send_receipt_email  
 
 router = APIRouter(prefix="/finance/mpesa", tags=["M-Pesa Automation Layer"])
 mpesa_service = MpesaService()
@@ -47,7 +48,11 @@ async def trigger_payment_push(
     }
 
 @router.post("/callback")
-async def mpesa_async_callback(request: Request, session: Session = Depends(get_session)):
+async def mpesa_async_callback(
+    request: Request, 
+    background_tasks: BackgroundTasks,  
+    session: Session = Depends(get_session)
+):
     payload = await request.json()
     
     stk_callback = payload.get("Body", {}).get("stkCallback", {})
@@ -77,6 +82,16 @@ async def mpesa_async_callback(request: Request, session: Session = Depends(get_
             invoice.status = "PAID"
             invoice.updated_at = datetime.utcnow()
             session.add(invoice)
+            
+            
+            if hasattr(invoice, 'owner_email') and invoice.owner_email:
+                background_tasks.add_task(
+                    send_receipt_email,
+                    recipient_email=invoice.owner_email,
+                    invoice_num=invoice.invoice_number,
+                    amount=txn.amount,
+                    receipt_num=receipt
+                )
     else:
         txn.status = "FAILED"
 
