@@ -14,10 +14,10 @@ async def create_log(
     request: Request,
     log_in: AuditLogCreate,
     session: Session = Depends(get_session),
-    current_admin_email: str = Depends(get_current_user) # Securely gets email from Token
+    current_admin: str = Depends(get_current_user) # Securely gets email from Token
 ):
     new_log = AuditLog(
-        admin_email=current_admin_email,
+        admin_email=current_admin.email.capitalize(), # Store email in capitalized form for consistency
         action=log_in.action,
         module=log_in.module,
         details=log_in.details,
