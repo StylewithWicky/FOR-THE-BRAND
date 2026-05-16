@@ -2,7 +2,7 @@ from __future__ import annotations
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager # 1. Import this
+from contextlib import asynccontextmanager
 import time
 import logging
 from sqlmodel import SQLModel 
@@ -16,7 +16,8 @@ from models.collaboraters import Mamorio
 from models.audit import AuditLog
 from models.logbook import LogEntry
 from models.system import SystemConfig, SecurityAudit
-from routes import msee, events, shops, trips, collaborater, audit ,logbook , archive , system
+from models.madoo import Invoice,  MadooInteraction
+from routes import msee, events, shops, trips, collaborater, audit ,logbook , archive , system , madoo
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,7 +26,7 @@ async def lifespan(app: FastAPI):
     yield
     logging.info("Shutting down...")
 
-for model in [Mzee, Sherehe, Merch, Matrip, Mamorio, AuditLog, LogEntry, FinanceArchive, TripArchive, VenueArchive, SystemConfig, SecurityAudit]:
+for model in [Mzee, Sherehe, Merch, Matrip, Mamorio, AuditLog, LogEntry, FinanceArchive, TripArchive, VenueArchive, SystemConfig, SecurityAudit, Invoice, MadooInteraction]:
     model.model_rebuild()
 
 logging.basicConfig(level=logging.INFO)
@@ -71,6 +72,7 @@ app.include_router(audit.router, prefix="/api/v1/trace", tags=["Security_Audit"]
 app.include_router(logbook.router, prefix="/api/v1/logbook", tags=["Logbook"])
 app.include_router(archive.router, prefix="/api/v1/archive", tags=["Archive"])
 app.include_router(system.router, prefix="/api/v1/system", tags=["System & Security"])
+app.include_router(madoo.router, prefix="/api/v1/MADOO", tags=["M-Pesa Automation Layer"])
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
