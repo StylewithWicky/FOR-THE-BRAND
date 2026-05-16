@@ -14,6 +14,7 @@ interface ModuleCardProps {
   desc: string;
   icon: React.ReactElement<{ size?: number; strokeWidth?: number }>;
   accent: string;
+  onClick?: () => void;
 }
 
 export default function AdminHub(): React.JSX.Element {
@@ -73,6 +74,7 @@ export default function AdminHub(): React.JSX.Element {
             desc="Capital flow management and real-time revenue analytics." 
             icon={<DollarSign />} 
             accent="#1A73E8" 
+            onClick={() => navigate('/a1/mdosi/finance')}
           />
 
           <ModuleCard 
@@ -80,6 +82,7 @@ export default function AdminHub(): React.JSX.Element {
             desc="Guest reservation oversight and venue timeline coordination." 
             icon={<Calendar />} 
             accent="#FFFFFF" 
+            onClick={() => navigate('/a1/mdosi/bookings')}
           />
 
           <ModuleCard 
@@ -87,6 +90,7 @@ export default function AdminHub(): React.JSX.Element {
             desc="Fleet tracking and automated field-work synchronization." 
             icon={<Truck />} 
             accent="#FF6B00" 
+            onClick={() => navigate('/a1/mdosi/logistics')}
           />
 
           <ModuleCard 
@@ -94,6 +98,7 @@ export default function AdminHub(): React.JSX.Element {
             desc="Inventory control and brand asset distribution." 
             icon={<ShoppingCart />} 
             accent="#1A73E8" 
+            onClick={() => navigate('/a1/mdosi/shop')}
           />
         </div>
       </main>
@@ -116,9 +121,12 @@ function NavItem({ icon, label, active = false, onClick }: NavItemProps): React.
   );
 }
 
-function ModuleCard({ title, desc, icon, accent }: ModuleCardProps): React.JSX.Element {
+function ModuleCard({ title, desc, icon, accent, onClick }: ModuleCardProps): React.JSX.Element {
   return (
-    <div className="group relative bg-gradient-to-br from-[#0A0A0A] to-[#050505] border border-white/[0.03] p-12 rounded-sm transition-all duration-700 hover:border-white/[0.08] cursor-pointer overflow-hidden">
+    <div 
+      onClick={onClick}
+      className="group relative bg-gradient-to-br from-[#0A0A0A] to-[#050505] border border-white/[0.03] p-12 rounded-sm transition-all duration-700 hover:border-white/[0.08] cursor-pointer overflow-hidden"
+    >
       <div className="absolute left-0 top-0 w-[2px] h-0 group-hover:h-full transition-all duration-700 shadow-[0_0_15px]" style={{ backgroundColor: accent, boxShadow: `0 0 15px ${accent}` }} />
 
       <div className="flex justify-between items-start mb-16">
