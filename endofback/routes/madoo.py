@@ -6,7 +6,7 @@ from models.madoo import MadooInteraction, Invoice
 from service.madoo import MpesaService
 from service.notifications import send_receipt_email  
 
-router = APIRouter(prefix="/finance/mpesa", tags=["M-Pesa Automation Layer"])
+router = APIRouter()
 mpesa_service = MpesaService()
 
 @router.post("/push", status_code=status.HTTP_202_ACCEPTED)
@@ -82,7 +82,6 @@ async def mpesa_async_callback(
             invoice.status = "PAID"
             invoice.updated_at = datetime.utcnow()
             session.add(invoice)
-            
             
             if hasattr(invoice, 'owner_email') and invoice.owner_email:
                 background_tasks.add_task(
