@@ -31,3 +31,32 @@ class MashereheUpdate(MashereheBase):
     public_rating: float | None = None
     image_url: str | None = None
     model_config = ConfigDict(from_attributes=True)
+    
+class PublicEventResponse(BaseModel):
+    id: int
+    title: str
+    venue_place: str
+    event_date: datetime
+    hotel_name: str | None = None
+    package_details: str | None = None
+
+class AdminTripDetails(BaseModel):
+    transport_means: str
+    driver_name: str | None = None
+    assignment_date: datetime.datetime | None = None
+    driver_charge: float
+    vehicle_sku: str | None = None
+
+class AdminEventResponse(BaseModel):
+    id: int
+    title: str
+    venue_place: str
+    event_date: datetime
+    hotel_name: str | None = None
+    contact_person: str | None = None
+    contact_phone: str | None = None
+    package_details: str | None = None
+    hotel_cost: float
+    is_archived: bool
+    created_at: datetime
+    trip_details: AdminTripDetails = None
