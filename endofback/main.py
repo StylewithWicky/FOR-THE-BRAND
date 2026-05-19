@@ -1,11 +1,13 @@
 from __future__ import annotations
+import time
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import time
-import logging
 from sqlmodel import SQLModel 
+
 from auth.database import engine 
 from models.archive import FinanceArchive, TripArchive, VenueArchive
 from models.msee import Mzee
@@ -16,20 +18,33 @@ from models.collaboraters import Mamorio
 from models.audit import AuditLog
 from models.logbook import LogEntry
 from models.system import SystemConfig, SecurityAudit
-from models.madoo import Invoice,  MadooInteraction
-from routes import msee, events, shops, trips, collaborater, audit ,logbook , archive , system , madoo , security
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logging.info("Creating database tables...")
-    SQLModel.metadata.create_all(engine)
-    yield
-    logging.info("Shutting down...")
+from models.madoo import Invoice, MadooInteraction
 
-for model in [Mzee, Sherehe, Merch, Matrip, Mamorio, AuditLog, LogEntry, FinanceArchive, TripArchive, VenueArchive, SystemConfig, SecurityAudit, Invoice, MadooInteraction]:
-    model.model_rebuild()
+from routes import (
+    msee, events, shops, trips, collaborater, 
+    audit, logbook, archive, system, madoo, 
+    security, masanse_comands
+)
+from middleware.masanse import AutomatedFirewallMiddleware
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("API_SECURITY")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Creating database tables...")
+    SQLModel.metadata.create_all(engine)
+    yield
+    logger.info("Shutting down...")
+
+for model in [
+    Mzee, Sherehe, Merch, Matrip, Mamorio, AuditLog, LogEntry, 
+    FinanceArchive, TripArchive, VenueArchive, SystemConfig, 
+    SecurityAudit, Invoice, MadooInteraction
+]:
+    model.model_rebuild()
 
 app = FastAPI(
     title="FOR-THE-BRAND API",
@@ -39,6 +54,8 @@ app = FastAPI(
 )
 
 
+app.add_middleware(AutomatedFirewallMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -46,6 +63,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
@@ -71,10 +89,12 @@ app.include_router(archive.router, prefix="/api/v1/archive", tags=["Archive"])
 app.include_router(system.router, prefix="/api/v1/system", tags=["System & Security"])
 app.include_router(madoo.router, prefix="/api/v1/MADOO", tags=["M-Pesa Automation Layer"])
 app.include_router(security.router, prefix="/api/v1/security", tags=["Security"])
+app.include_router(masanse_comands.router, prefix="/api/v1/masanse", tags=["Masanse Commands"])
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Global error caught: {str(exc)}")
+    logger.error(f"Global error caught: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "An internal server error occurred.", "type": type(exc).__name__},
