@@ -8,6 +8,7 @@ import Logbook from './Pages/LogBook';
 import Archive from './Pages/Archive';
 import SystemPage from './Pages/System';
 import FinancePage from './Pages/Finance';
+import BookingsAndEvents from './Pages/BookingandEvents';
 import { s } from './styles/Auth.styles';
 import type { AuthValues } from './lib/auth-schema';
 import { TraceProvider } from './context/TraceProvider';
@@ -95,6 +96,10 @@ function AppContent() {
 
         <Route path="/a1/mdosi/finance" element={
           authenticatedAsAdmin ? <FinancePage /> : <Navigate to="/kudonjo" replace />
+        } />
+
+        <Route path="/a1/mdosi/bookings" element={
+          authenticatedAsAdmin ? <BookingsAndEvents /> : <Navigate to="/kudonjo" replace />
         } />
 
         <Route path="/a1/mdosi/personnel" element={
