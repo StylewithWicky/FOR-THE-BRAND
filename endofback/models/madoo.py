@@ -12,6 +12,7 @@ class Invoice(SQLModel, table=True):
     owner_email: str = Field(description="Recipient email used to automatically send the receipt")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
     transactions: List["MadooInteraction"] = Relationship(back_populates="invoice")
 
 
@@ -19,7 +20,6 @@ class MadooInteraction(SQLModel, table=True):
     __tablename__: str = "madoo-interactions"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    invoice_id: str = Field(foreign_key="invoice.id", index=True)
     phone_number: str
     amount: float
     merchant_request_id: Optional[str] = Field(default=None, index=True)
@@ -30,6 +30,9 @@ class MadooInteraction(SQLModel, table=True):
     result_desc: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    invoice_id: Optional[str] = Field(default=None, foreign_key="invoice.id", index=True, nullable=True)
+    invoice_number: Optional[str] = Field(default=None, nullable=True)
+    
     invoice: Optional[Invoice] = Relationship(back_populates="transactions")
     
     
@@ -39,6 +42,6 @@ class SecurityLogTable(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     violation_type: str = Field(index=True)      
     offending_vector: str = Field(index=True)    
-    narrative: str                               
-    mitigation_mode: str                         
+    narrative: str                                
+    mitigation_mode: str                          
     created_at: datetime = Field(default_factory=datetime.utcnow)
