@@ -4,11 +4,12 @@ import axios from 'axios';
 
 export const TraceProvider = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const email = localStorage.getItem('yolo_email');
-  const token = localStorage.getItem('yolo_token');
 
   useEffect(() => {
     const recordTrace = async () => {
+      const email = localStorage.getItem('yolo_email');
+      const token = localStorage.getItem('yolo_token');
+
       if (email && token) {
         try {
           const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -20,7 +21,9 @@ export const TraceProvider = ({ children }: { children: React.ReactNode }) => {
             module: moduleName.toUpperCase(),
             details: `Admin navigated to ${location.pathname}`
           }, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { 
+              Authorization: `Bearer ${token}` 
+            }
           });
         } catch (err) {
           console.error("Trace Log Failed:", err);
@@ -29,7 +32,7 @@ export const TraceProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     recordTrace();
-  }, [location.pathname, email, token]);
+  }, [location.pathname]);
 
   return <>{children}</>;
 };
