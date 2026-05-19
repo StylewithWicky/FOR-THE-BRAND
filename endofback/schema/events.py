@@ -1,62 +1,59 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List
-from datetime import date
-import datetime
+from typing import List, Optional
+from datetime import datetime, date
 
 class MashereheBase(BaseModel):
-    name: str
-    description: str
-    date: datetime.date | None = None
-    location: str
-    activities: List[str]
-    price: float
-    public_rating: float
-    image_url: str 
-    model_config = ConfigDict(from_attributes=True)
-    
-class MashereheCreate(MashereheBase):
-    pass
-
-class MashereheSchema(MashereheBase):
-    
-    id: int
-    
-class MashereheUpdate(MashereheBase):
-    name: str | None = None
-    description: str | None = None
-    date: datetime.date | None = None
-    location:str | None = None
-    activities: str | None = None
-    price: float | None = None
-    public_rating: float | None = None
-    image_url: str | None = None
-    model_config = ConfigDict(from_attributes=True)
-    
-class PublicEventResponse(BaseModel):
-    id: int
     title: str
     venue_place: str
     event_date: datetime
-    hotel_name: str | None = None
-    package_details: str | None = None
+    hotel_name: Optional[str] = None
+    contact_person: Optional[str] = None
+    contact_phone: Optional[str] = None
+    package_details: Optional[str] = None
+    hotel_cost: float = 0.0
+
+class MashereheCreate(MashereheBase):
+    transport_means: str
+    driver_name: Optional[str] = None
+    assignment_date: Optional[datetime] = None
+    driver_charge: float = 0.0
+    vehicle_sku: Optional[str] = None
 
 class AdminTripDetails(BaseModel):
     transport_means: str
-    driver_name: str | None = None
-    assignment_date: datetime.datetime | None = None
+    driver_name: Optional[str] = None
+    assignment_date: Optional[datetime] = None
     driver_charge: float
-    vehicle_sku: str | None = None
+    vehicle_sku: Optional[str] = None
 
-class AdminEventResponse(BaseModel):
+class MashereheSchema(MashereheBase):
+    id: int
+    is_archived: bool
+    created_at: datetime
+    trip_details: Optional[AdminTripDetails] = None
+    model_config = ConfigDict(from_attributes=True)
+
+class MashereheUpdate(BaseModel):
+    title: Optional[str] = None
+    venue_place: Optional[str] = None
+    event_date: Optional[datetime] = None
+    hotel_name: Optional[str] = None
+    contact_person: Optional[str] = None
+    contact_phone: Optional[str] = None
+    package_details: Optional[str] = None
+    hotel_cost: Optional[float] = None
+    transport_means: Optional[str] = None
+    driver_name: Optional[str] = None
+    assignment_date: Optional[datetime] = None
+    driver_charge: Optional[float] = None
+    vehicle_sku: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+class PublicMashereheSchema(BaseModel):
     id: int
     title: str
     venue_place: str
     event_date: datetime
-    hotel_name: str | None = None
-    contact_person: str | None = None
-    contact_phone: str | None = None
-    package_details: str | None = None
-    hotel_cost: float
-    is_archived: bool
-    created_at: datetime
-    trip_details: AdminTripDetails = None
+    hotel_name: Optional[str] = None
+    package_details: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
