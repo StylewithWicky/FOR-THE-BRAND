@@ -53,7 +53,6 @@ def login_for_access_token(
     user_record = session.exec(statement).first() 
 
     if not user_record or not verify_password(form_data.password, user_record.hashed_password):
-        print(f"SECURITY_ALERT: Failed login attempt for {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
@@ -69,11 +68,6 @@ def login_for_access_token(
     is_admin = user_record.email.lower() in admin_emails
     user_role = "admin" if is_admin else "user"
 
-    print(f"--- TERMINAL_ENTRY_LOG ---")
-    print(f"IDENT: {user_record.email}")
-    print(f"TIME:  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"ROLE:  {user_role}")
-    print(f"--------------------------")
 
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
