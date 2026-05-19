@@ -1,13 +1,27 @@
 from datetime import datetime
+import ipaddress
 from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks
 from sqlmodel import Session, select
 from auth.database import get_session
 from models.madoo import MadooInteraction, Invoice
 from service.madoo import MpesaService
 from service.notifications import send_receipt_email  
+from config import settings
 
 router = APIRouter()
 mpesa_service = MpesaService()
+
+def verify_safaricom_origin(ip_string: str) -> bool:
+    if ip_string in ["127.0.0.1", "localhost"]:
+        return True
+    try:
+        client_ip = ipaddress.ip_address(ip_string)
+        for subnet_str in settings.safaricom_subnets:
+            if client_ip in ipaddress.ip_network(subnet_str, strict=False):
+                return True
+        return False
+    except ValueError:
+        return False
 
 @router.post("/push", status_code=status.HTTP_202_ACCEPTED)
 async def trigger_payment_push(
@@ -17,6 +31,16 @@ async def trigger_payment_push(
     amount: int,
     session: Session = Depends(get_session)
 ):
+   
+    db_invoice = session.exec(select(Invoice).where(Invoice.id == invoice_id)).first()
+    
+    if not db_invoice:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Invoice with ID '{invoice_id}' does not exist. Please create the invoice before initiating payment."
+        )
+
+  
     response_data = mpesa_service.send_stk_push(
         phone_number=phone_number, 
         amount=amount, 
@@ -30,8 +54,9 @@ async def trigger_payment_push(
     if response_code != "0":
         raise HTTPException(status_code=400, detail="Safaricom rejected the push initiation configuration.")
 
+    
     txn = MadooInteraction(
-        invoice_id=invoice_id,
+        invoice_id=db_invoice.id,
         phone_number=phone_number,
         amount=amount,
         merchant_request_id=merchant_id,
@@ -53,6 +78,15 @@ async def mpesa_async_callback(
     background_tasks: BackgroundTasks,  
     session: Session = Depends(get_session)
 ):
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        client_ip = forwarded_for.split(",")[0].strip()
+    else:
+        client_ip = request.headers.get("X-Real-IP") or (request.client.host if request.client else "UNKNOWN_IP")
+
+    if not verify_safaricom_origin(client_ip):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Callback origin untrusted.")
+
     payload = await request.json()
     
     stk_callback = payload.get("Body", {}).get("stkCallback", {})
