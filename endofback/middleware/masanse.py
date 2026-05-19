@@ -1,22 +1,31 @@
-import redis.asyncio as redis
+import time
 from fastapi import Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
+import redis.asyncio as redis
 from sqlmodel import Session
 from auth.database import get_session
 from models.madoo import SecurityLogTable
 from config import settings
-import time
 
 class AutomatedFirewallMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
-        self.redis_client = redis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+        self.redis_client = redis.from_url(
+            settings.redis_url, encoding="utf-8", decode_responses=True
+        )
 
     async def dispatch(self, request: Request, call_next):
-        client_ip = str(request.client.host) if request.client else "UNKNOWN_IP"
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            client_ip = forwarded_for.split(",")[0].strip()
+        else:
+            client_ip = request.headers.get("X-Real-IP") or (
+                request.client.host if request.client else "UNKNOWN_IP"
+            )
+        
         path = str(request.url.path)
         
-        is_blocked = await self.redis_client.sismember("blacklist:ips", client_ip)
+        is_blocked = await self.redis_client.get(f"blacklist:ip:{client_ip}")
         if is_blocked:
             return Response(
                 content="ACCESS_DENIED_GLOBAL_BLOCK_ACTIVE", 
@@ -44,20 +53,17 @@ class AutomatedFirewallMiddleware(BaseHTTPMiddleware):
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS
                 )
 
-        try:
-            response = await call_next(request)
-            return response
-        except Exception as e:
-            raise e
+        return await call_next(request)
 
     async def log_and_ban_vector(self, ip_address: str, phone_number: str, violation: str, narrative: str):
+    
         if ip_address and ip_address != "UNKNOWN_IP":
-            await self.redis_client.sadd("blacklist:ips", ip_address)
-            await self.redis_client.expire(f"blacklist:ips:{ip_address}", 86400)
+            await self.redis_client.set(f"blacklist:ip:{ip_address}", "banned", ex=86400)
             
         if phone_number:
-            await self.redis_client.sadd("blacklist:phones", phone_number)
+            await self.redis_client.set(f"blacklist:phone:{phone_number}", "banned", ex=86400)
             
+      
         await self.redis_client.xadd(
             "STK:security:stream",
             {
@@ -70,8 +76,8 @@ class AutomatedFirewallMiddleware(BaseHTTPMiddleware):
         )
 
         session_generator = get_session()
-        session: Session = next(session_generator)
         try:
+            session: Session = next(session_generator)
             log = SecurityLogTable(
                 violation_type=violation,
                 offending_vector=ip_address if ip_address else phone_number,
@@ -80,5 +86,11 @@ class AutomatedFirewallMiddleware(BaseHTTPMiddleware):
             )
             session.add(log)
             session.commit()
-        finally:
-            session.close()
+            
+            
+            try:
+                next(session_generator)
+            except StopIteration:
+                pass
+        except Exception as db_err:
+            raise db_err
