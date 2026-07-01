@@ -20,3 +20,20 @@ h1, h3 {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+/* At the bottom of your src/index.css file */
+
+@layer utilities {
+  /* 1. Hides the scrollbar track so the horizontal card deck looks seamless */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+
+  /* 2. Premium, cinematic easing for hovers and micro-interactions */
+  .fluid-ease {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}

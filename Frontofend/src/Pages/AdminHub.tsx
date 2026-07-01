@@ -1,151 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, Users, Settings, Calendar, History, DollarSign, Truck, ShoppingCart, ArrowUpRight, Bell, Search } from "lucide-react";
-
-interface NavItemProps {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-}
-
-interface ModuleCardProps {
-  title: string;
-  desc: string;
-  icon: React.ReactElement<{ size?: number; strokeWidth?: number }>;
-  accent: string;
-  onClick?: () => void;
-}
+import { Home, Users, Settings, Calendar, History, DollarSign, Truck, ShoppingCart, ArrowRight, Bell, Search, Menu, X } from "lucide-react";
 
 export default function AdminHub(): React.JSX.Element {
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full bg-[#050505] text-white overflow-hidden font-sans selection:bg-[#1A73E8]/30">
-      <aside className="w-64 border-r border-white/[0.03] flex flex-col p-10 z-50 bg-black/20 backdrop-blur-2xl">
-        <div className="flex items-center gap-3 mb-20 group cursor-pointer">
-          <div className="w-1 h-10 bg-[#1A73E8] group-hover:shadow-[0_0_20px_#1A73E8] transition-all duration-500" />
-          <img 
-            src="/image/YOLO.png"
-            alt="YOLO Connect" 
-            className="w-20 h-auto transition-all duration-500 drop-shadow-[0_0_8px_rgba(26,115,232,0.2)] group-hover:drop-shadow-[0_0_20px_rgba(26,115,232,0.5)] group-hover:scale-105"
-          />
-          <p className="text-[8px] font-black tracking-[0.4em] text-zinc-600 uppercase group-hover:text-zinc-400 transition-colors">
-            ONLIKEMF-os
-          </p>
+    <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans relative overflow-hidden">
+      
+      {/* Mobile Sidebar Overlay Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden transition-opacity duration-200"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Collapsed completely on mobile, slides in from z-index, handles standard layout on desktop */}
+      <aside className={`
+        fixed inset-y-0 left-0 w-72 border-r border-slate-200 bg-white p-6 md:p-10 flex flex-col z-50 transform transition-transform duration-300 ease-in-out
+        lg:translate-x-0 lg:static lg:z-auto
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Sidebar Close Button - Mobile Only */}
+        <div className="flex lg:hidden justify-end mb-4">
+          <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-slate-900">
+            <X size={24} />
+          </button>
         </div>
 
-        <nav className="space-y-8 flex-1">
-          <NavItem icon={<Home size={18} />} label="Terminal" active onClick={() => navigate('/a1/mdosi/kejayamkuu')} />
-          <NavItem icon={<Users size={18} />} label="Personnel" onClick={() => navigate('/a1/mdosi/personnel')} />
-          <NavItem icon={<Calendar size={18} />} label="Logbook" onClick={() => navigate('/a1/mdosi/logbook')} />
-          <NavItem icon={<History size={18} />} label="Archive" onClick={() => navigate('/a1/mdosi/archive')} />
+        <div className="flex items-center gap-3 mb-12 lg:mb-16">
+          <div className="w-1 h-8 bg-blue-600 rounded-full" />
+          <span className="text-[10px] font-black tracking-[0.2em] uppercase text-slate-400">YOLO Connect OS</span>
+        </div>
+
+        <nav className="space-y-6 flex-1">
+          <NavItem icon={<Home size={18} />} label="Terminal" active onClick={() => { navigate('/a1/mdosi/kejayamkuu'); setIsSidebarOpen(false); }} />
+          <NavItem icon={<Users size={18} />} label="Personnel" onClick={() => { navigate('/a1/mdosi/personnel'); setIsSidebarOpen(false); }} />
+          <NavItem icon={<Calendar size={18} />} label="Logbook" onClick={() => { navigate('/a1/mdosi/logbook'); setIsSidebarOpen(false); }} />
+          <NavItem icon={<History size={18} />} label="Archive" onClick={() => { navigate('/a1/mdosi/archive'); setIsSidebarOpen(false); }} />
         </nav>
 
-        <div className="pt-10 border-t border-white/[0.03]">
-          <NavItem icon={<Settings size={18} />} label="System" onClick={() => navigate('/a1/mdosi/system')} />
+        <div className="pt-6 border-t border-slate-100">
+          <NavItem icon={<Settings size={18} />} label="System" onClick={() => { navigate('/a1/mdosi/system'); setIsSidebarOpen(false); }} />
         </div>
       </aside>
 
-      <main className="flex-1 p-20 overflow-y-auto custom-scrollbar studio-bg">
-        <header className="flex justify-between items-end mb-24">
+      {/* Main Content Viewport */}
+      <main className="flex-1 p-6 md:p-12 lg:p-20 overflow-y-auto w-full">
+        <header className="flex justify-between items-end mb-10 lg:mb-20">
           <div>
-            <p className="text-[#1A73E8] text-[9px] font-black tracking-[0.5em] uppercase mb-6 opacity-50">
-              ALWAYS FOR THE BRAND
-            </p>
-            <h1 className="text-7xl font-black tracking-tighter leading-none mb-2">
-              WaGwAn WaDaU!!
-            </h1>
-            <div className="h-[2px] w-24 bg-[#1A73E8] mt-4" />
+            <div className="flex items-center gap-4 mb-2">
+              {/* Hamburger Toggle - Only Visible on Mobile/Tablet viewports */}
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden text-slate-600 hover:text-slate-900 transition-colors p-1 -ml-1"
+              >
+                <Menu size={24} />
+              </button>
+              <p className="text-blue-600 text-[10px] font-bold tracking-[0.3em] uppercase pt-0.5">Welcome Back</p>
+            </div>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">WaGwAn WaDaU!</h1>
           </div>
           
-          <div className="flex items-center gap-8 pb-4">
-             <button className="p-2 text-zinc-600 hover:text-white transition-all"><Search size={20} strokeWidth={1.5}/></button>
-             <button className="relative p-2 text-zinc-600 hover:text-white transition-all">
-                <Bell size={20} strokeWidth={1.5} />
-                <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-[#FF6B00] rounded-full shadow-[0_0_10px_#FF6B00]" />
-             </button>
+          <div className="flex items-center gap-4 md:gap-6 pb-1">
+            <button className="text-slate-400 hover:text-slate-900 transition-colors"><Search size={20}/></button>
+            <button className="relative text-slate-400 hover:text-slate-900 transition-colors">
+              <Bell size={20} />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full" />
+            </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl">
-          <ModuleCard 
-            title="FINANCE & INVOICING" 
-            desc="Capital flow management and real-time revenue analytics." 
-            icon={<DollarSign />} 
-            accent="#1A73E8" 
-            onClick={() => navigate('/a1/mdosi/finance')}
-          />
-
-          <ModuleCard 
-            title="BOOKING & EVENTS" 
-            desc="Guest reservation oversight and venue timeline coordination." 
-            icon={<Calendar />} 
-            accent="#FFFFFF" 
-            onClick={() => navigate('/a1/mdosi/bookings')}
-          />
-
-          <ModuleCard 
-            title="LOGISTICS & SCHEDULING" 
-            desc="Fleet tracking and automated field-work synchronization." 
-            icon={<Truck />} 
-            accent="#FF6B00" 
-            onClick={() => navigate('/a1/mdosi/logistics')}
-          />
-
-          <ModuleCard 
-            title="SHOP & MERCH" 
-            desc="Inventory control and brand asset distribution." 
-            icon={<ShoppingCart />} 
-            accent="#1A73E8" 
-            onClick={() => navigate('/a1/mdosi/shop')}
-          />
+        {/* Modules Grid - Base 1 column, switches to 2 columns on medium break points and wider */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl">
+          <ModuleCard title="Finance & Invoicing" desc="Capital flow management and revenue analytics." icon={<DollarSign />} onClick={() => navigate('/a1/mdosi/finance')} />
+          <ModuleCard title="Booking & Events" desc="Guest reservation and venue coordination." icon={<Calendar />} onClick={() => navigate('/a1/mdosi/bookings')} />
+          <ModuleCard title="Logistics & Scheduling" desc="Fleet tracking and field-work synchronization." icon={<Truck />} onClick={() => navigate('/a1/mdosi/trips')} />
+          <ModuleCard title="Shop & Merch" desc="Inventory control and asset distribution." icon={<ShoppingCart />} onClick={() => navigate('/a1/mdosi/merch')} />
         </div>
       </main>
     </div>
   );
 }
 
-function NavItem({ icon, label, active = false, onClick }: NavItemProps): React.JSX.Element {
+function NavItem({ icon, label, active = false, onClick }: any) {
   return (
-    <div 
-      onClick={onClick}
-      className={`
-        flex items-center gap-5 cursor-pointer transition-all duration-500 group
-        ${active ? 'text-white' : 'text-zinc-600 hover:text-zinc-300'}
-      `}
-    >
-      <span className={`${active ? 'text-[#1A73E8]' : 'group-hover:text-white transition-colors'}`}>{icon}</span>
-      <span className="text-[10px] font-bold tracking-[0.3em] uppercase">{label}</span>
+    <div onClick={onClick} className={`flex items-center gap-4 cursor-pointer group ${active ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}>
+      <span className={active ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-900'}>{icon}</span>
+      <span className="text-[10px] font-bold tracking-[0.2em] uppercase">{label}</span>
     </div>
   );
 }
 
-function ModuleCard({ title, desc, icon, accent, onClick }: ModuleCardProps): React.JSX.Element {
+function ModuleCard({ title, desc, icon, onClick }: any) {
   return (
-    <div 
-      onClick={onClick}
-      className="group relative bg-gradient-to-br from-[#0A0A0A] to-[#050505] border border-white/[0.03] p-12 rounded-sm transition-all duration-700 hover:border-white/[0.08] cursor-pointer overflow-hidden"
-    >
-      <div className="absolute left-0 top-0 w-[2px] h-0 group-hover:h-full transition-all duration-700 shadow-[0_0_15px]" style={{ backgroundColor: accent, boxShadow: `0 0 15px ${accent}` }} />
-
-      <div className="flex justify-between items-start mb-16">
-        <div className="text-zinc-700 group-hover:text-white transition-all duration-700">
-          {React.cloneElement(icon, { size: 30, strokeWidth: 1 })}
-        </div>
-        <ArrowUpRight size={20} className="text-zinc-900 group-hover:text-zinc-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-700" />
+    <div onClick={onClick} className="bg-white p-6 md:p-10 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+      <div className="flex justify-between items-start mb-6 md:mb-10">
+        <div className="text-blue-600 bg-blue-50 p-3 md:p-4 rounded-2xl">{React.cloneElement(icon, { size: 24 })}</div>
+        <ArrowRight size={20} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
       </div>
-
-      <div className="relative z-10">
-        <h3 className="text-2xl font-black tracking-tighter text-zinc-400 group-hover:text-white transition-all duration-700 mb-3 uppercase italic">
-          {title}
-        </h3>
-        <p className="text-zinc-600 text-xs font-medium leading-relaxed max-w-[280px] group-hover:text-zinc-400 transition-all duration-700">
-          {desc}
-        </p>
-      </div>
-
-      <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full blur-[100px] opacity-0 group-hover:opacity-10 transition-opacity duration-1000" style={{ backgroundColor: accent }} />
+      <h3 className="text-lg md:text-xl font-bold mb-2">{title}</h3>
+      <p className="text-xs text-slate-500 font-medium leading-relaxed">{desc}</p>
     </div>
   );
 }

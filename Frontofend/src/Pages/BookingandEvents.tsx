@@ -1,264 +1,259 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Phone, User, Truck, DollarSign, ShieldAlert, Plus, CheckCircle, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Truck, DollarSign, Plus, ChevronLeft, X, Hotel, Phone, User } from 'lucide-react';
 import axiosClient from '../api/axiosClients';
-
-interface TripLogistics {
-  transport_means: string;
-  driver_name: string | null;
-  assignment_date: string | null;
-  driver_charge: number;
-  vehicle_sku: string | null;
-}
-
-interface AdminEvent {
-  id: number;
-  title: string;
-  venue_place: string;
-  event_date: string;
-  hotel_name: string | null;
-  contact_person: string | null;
-  contact_phone: string | null;
-  package_details: string | null;
-  hotel_cost: number;
-  is_archived: boolean;
-  trip_details: TripLogistics | null;
-}
+import { useNavigate } from 'react-router-dom';
 
 export default function BookingsAndEvents() {
-  const [events, setEvents] = useState<AdminEvent[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   
+  // Form State for Eka Kitu
   const [formData, setFormData] = useState({
-    title: '',
-    venue_place: '',
-    event_date: '',
+    name: '',
+    description: '',
+    date: '',
+    location: '',
+    activities: '',
+    price: '',
     hotel_name: '',
+    hotel_cost: '',
     contact_person: '',
     contact_phone: '',
-    package_details: '',
-    hotel_cost: 0,
-    transport_means: '',
-    driver_name: '',
-    assignment_date: '',
-    driver_charge: 0,
-    vehicle_sku: ''
+    package_details: ''
   });
+
+  const navigate = useNavigate();
 
   const fetchEvents = async () => {
     try {
-      const response = await axiosClient.get('/api/v1/admin/all');
+      const response = await axiosClient.get('/sherehe/mkubwa/zote');
       setEvents(response.data);
-    } catch (err) {
-      console.error("Error retrieving admin events:", err);
+    } catch (err) { 
+      console.error("Error fetching events:", err); 
     }
   };
 
-  useEffect(() => {
-    fetchEvents();
+  useEffect(() => { 
+    fetchEvents(); 
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name.includes('cost') || name.includes('charge') ? parseFloat(value) || 0 : value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axiosClient.post('/api/v1/', formData);
+      // Transforming string values to numeric types where your backend expects it
+      const payload = {
+        ...formData,
+        price: parseFloat(formData.price) || 0,
+        hotel_cost: parseFloat(formData.hotel_cost) || 0,
+        date: new Date(formData.date).toISOString()
+      };
+      
+      await axiosClient.post('/sherehe/mkubwa/zote', payload); // Adjust endpoint if creation URL differs
       setShowModal(false);
-      fetchEvents();
+      // Reset Form
       setFormData({
-        title: '', venue_place: '', event_date: '', hotel_name: '',
-        contact_person: '', contact_phone: '', package_details: '', hotel_cost: 0,
-        transport_means: '', driver_name: '', assignment_date: '', driver_charge: 0, vehicle_sku: ''
+        name: '', description: '', date: '', location: '', activities: '',
+        price: '', hotel_name: '', hotel_cost: '', contact_person: '',
+        contact_phone: '', package_details: ''
       });
+      fetchEvents();
     } catch (err) {
-      console.error("Failed to create event:", err);
+      console.error("Error creating event:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) return;
-    try {
-      await axiosClient.delete(`/api/v1/${id}`);
-      fetchEvents();
-    } catch (err) {
-      console.error("Delete operation failed:", err);
-    }
-  };
-
   return (
-    <div style={{ padding: '24px', fontFamily: 'sans-serif', backgroundColor: '#111', color: '#fff', minHeight: '100vh' }}>
-      <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: 0 }}>Bookings & Events Hub</h1>
-          <p style={{ color: '#aaa', margin: '4px 0 0 0' }}>Manage unified event schedules and internal fleet logistics</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-4 sm:p-8 md:p-20 relative overflow-x-hidden">
+      
+      {/* Back Button */}
+      <div className="max-w-7xl mx-auto mb-6 md:mb-12">
         <button 
-          onClick={() => setShowModal(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#0070f3', color: '#fff', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+          onClick={() => navigate('/a1/mdosi/kejayamkuu')} 
+          className="flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors uppercase text-[10px] font-bold tracking-widest"
         >
-          <Plus size={20} /> Create New Operation
+          <ChevronLeft size={16} /> Back to Dash
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-        {events.map(event => {
-          const totalCost = event.hotel_cost + (event.trip_details?.driver_charge || 0);
-          return (
-            <div key={event.id} style={{ backgroundColor: '#222', borderRadius: '12px', border: '1fr solid #333', overflow: 'hidden' }}>
-              <div style={{ padding: '20px', borderBottom: '1fr solid #333', display: 'flex', justifyContent: 'between', alignItems: 'start' }}>
-                <div>
-                  <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#0070f3' }}>{event.title}</h2>
-                  <div style={{ display: 'flex', gap: '16px', color: '#aaa', fontSize: '14px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={16} /> {new Date(event.event_date).toLocaleString()}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={16} /> {event.venue_place}</span>
-                  </div>
-                </div>
-                <button onClick={() => handleDelete(event.id)} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer' }}>
-                  <Trash2 size={20} />
-                </button>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', backgroundColor: '#333' }}>
-                <div style={{ backgroundColor: '#1e1e1e', padding: '20px' }}>
-                  <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: '#888', marginTop: 0, marginBottom: '12px', letterSpacing: '1px' }}>Hospitality & Package</h3>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>Hotel:</strong> {event.hotel_name || 'N/A'}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>Contact:</strong> {event.contact_person || 'N/A'} ({event.contact_phone || 'N/A'})</p>
-                  <p style={{ margin: '0 0 12px 0', color: '#ccc', fontSize: '14px' }}>{event.package_details || 'No package description details provided.'}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', color: '#00ff66', fontWeight: 'bold' }}>
-                    <DollarSign size={16} /> Venue Cost: KES {event.hotel_cost.toLocaleString()}
-                  </div>
-                </div>
-
-                <div style={{ backgroundColor: '#1a2333', padding: '20px' }}>
-                  <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: '#38bdf8', marginTop: 0, marginBottom: '12px', letterSpacing: '1px' }}>Internal Logistics (Hidden from Client)</h3>
-                  {event.trip_details ? (
-                    <>
-                      <p style={{ margin: '0 0 8px 0' }}><strong>Transit Mode:</strong> {event.trip_details.transport_means}</p>
-                      <p style={{ margin: '0 0 8px 0' }}><strong>Driver Assigned:</strong> {event.trip_details.driver_name || 'Unassigned'}</p>
-                      <p style={{ margin: '0 0 8px 0' }}><strong>Fleet Unit SKU:</strong> <code style={{ backgroundColor: '#111', padding: '2px 6px', borderRadius: '4px' }}>{event.trip_details.vehicle_sku || 'N/A'}</code></p>
-                      <div style={{ display: 'flex', alignItems: 'center', color: '#38bdf8', fontWeight: 'bold' }}>
-                        <DollarSign size={16} /> Driver Pay: KES {event.trip_details.driver_charge.toLocaleString()}
-                      </div>
-                    </>
-                  ) : (
-                    <p style={{ color: '#aaa', fontStyle: 'italic' }}>No logistics attached to this operation.</p>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ padding: '12px 20px', backgroundColor: '#151515', display: 'flex', justifyContent: 'between', fontSize: '14px' }}>
-                <span style={{ color: '#aaa' }}>Operation ID: {event.id}</span>
-                <span style={{ fontWeight: 'bold', color: '#fff' }}>Total Running Cost: KES {totalCost.toLocaleString()}</span>
-              </div>
-            </div>
-          );
-        })}
+      {/* Header - Stacked on Mobile, Flex on Desktop */}
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8 md:mb-12">
+        <div>
+          <p className="text-blue-600 text-[10px] font-bold tracking-[0.3em] uppercase mb-1 sm:mb-2">Fleet & Event Management</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Bookings & Events</h1>
+        </div>
+        <button 
+          onClick={() => setShowModal(true)}
+          className="w-full sm:w-auto bg-slate-900 text-white px-8 py-3.5 sm:py-3 rounded-full text-xs font-bold hover:bg-slate-800 active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm"
+        >
+          <Plus size={16} /> EKA KITU 
+        </button>
       </div>
 
+      {/* Event Grid - Single Column on Mobile, Two Columns on Medium+ screens */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        {events.length === 0 ? (
+          <div className="lg:col-span-2 text-center py-20 bg-white border border-dashed border-slate-200 rounded-3xl text-slate-400 font-medium text-sm">
+            Hakuna sherehe zilizopatikana. Gusa 'Eka Kitu' kuongeza.
+          </div>
+        ) : (
+          events.map(event => {
+            // Safe fallback attributes matching your Python backend properties
+            const trip = event.trip_details?.[0]; 
+            const eventName = event.name || "Untitled Event";
+            const eventDate = event.date ? new Date(event.date).toLocaleDateString() : 'No Date';
+            const location = event.location || 'No Location Set';
+
+            return (
+              <div key={event.id} className="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div className="mb-6">
+                  <div className="flex justify-between items-start gap-4">
+                    <h2 className="text-md md:text-lg font-bold text-slate-900 tracking-tight line-clamp-2">{eventName}</h2>
+                  </div>
+                  
+                  {/* Event Meta Badges */}
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 text-slate-400 mt-2.5">
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+                      <Calendar size={12} className="text-slate-400" /> {eventDate}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+                      <MapPin size={12} className="text-slate-400" /> {location}
+                    </span>
+                  </div>
+                  {event.description && (
+                    <p className="text-xs text-slate-500 mt-3 line-clamp-2 border-l-2 border-slate-100 pl-2.5">{event.description}</p>
+                  )}
+                </div>
+
+                {/* Logistics & Hospitality Breakdown */}
+                <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
+                  <div className="pr-2">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1"><Hotel size={10}/> Hospitality</p>
+                    <p className="text-xs font-semibold text-slate-800 truncate">{event.hotel_name || 'Unassigned'}</p>
+                    <p className="text-[11px] font-extrabold text-emerald-600 mt-1">KES {(event.hotel_cost || 0).toLocaleString()}</p>
+                  </div>
+                  <div className="border-l border-slate-100 pl-4">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1"><Truck size={10}/> Logistics</p>
+                    <p className="text-xs font-semibold text-slate-800 truncate">{trip?.transport_means || 'Unassigned'}</p>
+                    <p className="text-[11px] font-extrabold text-blue-600 mt-1">KES {(trip?.driver_charge || 0).toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* "Eka Kitu" Side Drawer / Modal Drawer for Mobile & Desktop Context */}
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
-          <form onSubmit={handleSubmit} style={{ backgroundColor: '#222', borderRadius: '16px', maxWidth: '900px', width: '100%', maxHeight: '90vh', overflowY: 'auto', border: '1fr solid #333' }}>
-            <div style={{ padding: '20px', borderBottom: '1fr solid #333', display: 'flex', justifyContent: 'between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0, fontSize: '22px' }}>Initialize Management Operation</h2>
-              <button type="button" onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#aaa', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', padding: '24px' }}>
+        <div className="fixed inset-0 z-50 flex justify-end transition-opacity duration-300">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => setShowModal(false)}
+          />
+          
+          {/* Form Container */}
+          <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto z-10 animate-in slide-in-from-right duration-200">
+            
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div>
-                <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#0070f3', display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={18} /> Hospitality & Event Specs</h3>
-                
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Operation Title</span>
-                  <input type="text" name="title" required value={formData.title} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <label style={{ display: 'block', marginBottom: '12px' }}>
-                    <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Venue Place</span>
-                    <input type="text" name="venue_place" required value={formData.venue_place} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                  </label>
-                  <label style={{ display: 'block', marginBottom: '12px' }}>
-                    <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Event Date & Time</span>
-                    <input type="datetime-local" name="event_date" required value={formData.event_date} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                  </label>
-                </div>
-
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Hotel Name</span>
-                  <input type="text" name="hotel_name" value={formData.hotel_name} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <label style={{ display: 'block', marginBottom: '12px' }}>
-                    <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Contact Person</span>
-                    <input type="text" name="contact_person" value={formData.contact_person} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                  </label>
-                  <label style={{ display: 'block', marginBottom: '12px' }}>
-                    <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Contact Phone</span>
-                    <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                  </label>
-                </div>
-
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Package Details</span>
-                  <textarea name="package_details" value={formData.package_details} onChange={handleChange} rows={3} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff', resize: 'none' }} />
-                </label>
-
-                <label style={{ display: 'block' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Hotel Cost (KES)</span>
-                  <input type="number" name="hotel_cost" value={formData.hotel_cost} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">New Entry</p>
+                <h2 className="text-xl font-bold text-slate-900">Eka Kitu Mpya</h2>
               </div>
-
-              <div>
-                <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px' }}><Truck size={18} /> Internal Operational Logistics</h3>
-                
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Means of Transport</span>
-                  <input type="text" name="transport_means" required placeholder="e.g. Mercedes V-Class, Helicopter" value={formData.transport_means} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
-
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Driver Name</span>
-                  <input type="text" name="driver_name" value={formData.driver_name} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
-
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Assignment Date</span>
-                  <input type="datetime-local" name="assignment_date" value={formData.assignment_date} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
-
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Vehicle Fleet SKU / Plates</span>
-                  <input type="text" name="vehicle_sku" placeholder="e.g. KDL 001A" value={formData.vehicle_sku} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
-
-                <label style={{ display: 'block' }}>
-                  <span style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#aaa' }}>Driver Charge (KES)</span>
-                  <input type="number" name="driver_charge" value={formData.driver_charge} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1fr solid #444', backgroundColor: '#333', color: '#fff' }} />
-                </label>
-              </div>
-            </div>
-
-            <div style={{ padding: '20px', borderTop: '1fr solid #333', display: 'flex', justifyContent: 'end', gap: '12px', backgroundColor: '#151515' }}>
-              <button type="button" onClick={() => setShowModal(false)} style={{ backgroundColor: 'transparent', color: '#fff', border: '1fr solid #444', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
-              <button type="submit" disabled={loading} style={{ backgroundColor: '#0070f3', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                {loading ? 'Processing...' : 'Save & Deploy'}
+              <button 
+                onClick={() => setShowModal(false)}
+                className="p-2 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <X size={18} />
               </button>
             </div>
-          </form>
+
+            {/* Modal Content / Form */}
+            <form onSubmit={handleSubmit} className="p-6 flex-1 space-y-5">
+              
+              {/* Basic Section */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b pb-1">1. Event Basics</p>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Event Name *</label>
+                  <input type="text" name="name" required value={formData.name} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="e.g., Koroga Festival" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Date *</label>
+                    <input type="date" name="date" required value={formData.date} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Location *</label>
+                    <input type="text" name="location" required value={formData.location} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="e.g., Naivasha" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Description / Activities</label>
+                  <textarea name="description" rows={2} value={formData.description} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors resize-none" placeholder="Details about the setup..." />
+                </div>
+              </div>
+
+              {/* Hospitality Section */}
+              <div className="space-y-3 pt-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b pb-1">2. Hospitality Details</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Hotel Name</label>
+                    <input type="text" name="hotel_name" value={formData.hotel_name} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="e.g., Enashipai" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Hotel Cost (KES)</label>
+                    <input type="number" name="hotel_cost" value={formData.hotel_cost} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="0" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Contact Person</label>
+                    <input type="text" name="contact_person" value={formData.contact_person} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="Manager Name" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Contact Phone</label>
+                    <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="07123..." />
+                  </div>
+                </div>
+              </div>
+
+            </form>
+
+            {/* Modal Actions */}
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3">
+              <button 
+                type="button" 
+                onClick={() => setShowModal(false)}
+                className="flex-1 bg-white border border-slate-200 text-slate-700 py-3 rounded-full text-xs font-bold hover:bg-slate-100 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 bg-slate-900 text-white py-3 rounded-full text-xs font-bold hover:bg-slate-800 disabled:bg-slate-400 transition-all shadow-sm"
+              >
+                {loading ? 'Saving...' : 'Save Record'}
+              </button>
+            </div>
+
+          </div>
         </div>
       )}
+
     </div>
   );
 }

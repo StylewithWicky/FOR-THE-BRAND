@@ -11,25 +11,38 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@studio-freight/lenis": "^1.0.42",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.16.0",
     "class-variance-authority": "^0.7.1",
+    "framer-motion": "^12.40.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.14.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-hook-form": "^7.75.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.15.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/leaflet": "^1.9.21",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "and": "^0.0.3",
+    "autoprefixer": "^10.5.2",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "init": "^0.1.2",
+    "npx": "^10.2.2",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^4.3.2",
     "vite": "^8.0.10"
   }
 }
