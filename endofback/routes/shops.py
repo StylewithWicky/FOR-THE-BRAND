@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlmodel import Session, select
 from typing import List
 from models.shop import Merch
@@ -9,25 +9,32 @@ from models.msee import Mzee
 
 router = APIRouter()
 
+
 @router.get("/", response_model=List[MerchSchema])
 def list_merchandise(
-    category: str | None = None, # Modern syntax
+    category: str | None = None,
     offset: int = 0, 
     limit: int = 30, 
     session: Session = Depends(get_session)
 ):
-    statement = select(Merch)
+    # Only fetch active inventory items that haven't been soft-deleted/archived
+    statement = select(Merch).where(Merch.is_archived == False)
     if category:
         statement = statement.where(Merch.category == category)
     
     return session.exec(statement.offset(offset).limit(limit)).all()
 
+
 @router.get("/{item_id}", response_model=MerchSchema)
 def get_item(item_id: int, session: Session = Depends(get_session)):
     item = session.get(Merch, item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
+    if not item or item.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Item not found or no longer available"
+        )
     return item
+
 
 @router.post("/", response_model=MerchSchema, status_code=status.HTTP_201_CREATED)
 def add_new_item(
@@ -36,13 +43,26 @@ def add_new_item(
     current_user: Mzee = Depends(get_current_user)
 ):
     if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin privileges required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Forbidden: Admin privileges required"
+        )
+    
+    # Validation against negative business values during item creation
+    if item_in.price < 0 or item_in.stock < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Price and stock levels cannot be negative values."
+        )
     
     new_item = Merch.model_validate(item_in)
+    new_item.is_archived = False  # Explicitly initialize state tracker
+    
     session.add(new_item)
     session.commit()
     session.refresh(new_item)
     return new_item
+
 
 @router.patch("/{item_id}", response_model=MerchSchema)
 def update_stock_or_price(
@@ -52,13 +72,26 @@ def update_stock_or_price(
     current_user: Mzee = Depends(get_current_user)
 ):
     if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Operation not permitted")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Forbidden: Operation not permitted"
+        )
         
     db_item = session.get(Merch, item_id)
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
+    if not db_item or db_item.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Item not found"
+        )
     
     update_data = item_in.model_dump(exclude_unset=True)
+    
+    # Financial protection logic validation gates
+    if "price" in update_data and update_data["price"] < 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Price cannot be negative.")
+    if "stock" in update_data and update_data["stock"] < 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Stock metrics cannot be negative.")
+        
     for key, value in update_data.items():
         setattr(db_item, key, value)
         
@@ -67,6 +100,7 @@ def update_stock_or_price(
     session.refresh(db_item)
     return db_item
 
+
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_merch_item(
     item_id: int, 
@@ -74,12 +108,21 @@ def delete_merch_item(
     current_user: Mzee = Depends(get_current_user)
 ):
     if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Unauthorized: Admin access required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Unauthorized: Admin access required"
+        )
         
     item = session.get(Merch, item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
+    if not item or item.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Item not found"
+        )
         
-    session.delete(item)
+    
+    item.is_archived = True
+    session.add(item)
     session.commit()
-    return None
+    
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

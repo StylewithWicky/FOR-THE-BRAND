@@ -8,6 +8,8 @@ class MzeeBase(BaseModel):
     sku: str | None = None
     is_admin: bool =False 
     is_active: bool = True
+    points: int | None = 0
+    tier: str | None = "Calm"
     model_config = ConfigDict(from_attributes=True)
     
 class MzeeCreate(MzeeBase):
@@ -25,4 +27,6 @@ class MzeeUpdate(BaseModel):
     sku: str | None = None
     is_admin: bool | None = None 
     is_active: bool | None = None
+    points: int | None = None
+    tier: str | None = None
     model_config = ConfigDict(from_attributes=True)

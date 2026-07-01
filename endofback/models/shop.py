@@ -10,3 +10,4 @@ class Merch(SQLModel, table=True):
     category: str
     image_url: str | None = Field(default=None)
     sku: str
+    is_archived: bool = Field(default=False)

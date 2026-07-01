@@ -1,7 +1,10 @@
-from sqlmodel import SQLModel, Field
-from typing import List
+from sqlmodel import SQLModel, Field,Relationship
+from typing import List,TYPE_CHECKING
 import datetime
 from sqlalchemy import Column, ARRAY, TEXT
+if TYPE_CHECKING:
+    from models.msee import Mzee
+
 
 class Matrip(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -9,6 +12,7 @@ class Matrip(SQLModel, table=True):
     description: str | None = Field(default=None)
     start_date: datetime.date
     end_date: datetime.date
+    package_type:str 
     location: str
     activities: List[str] | None = Field(default=None, sa_column=Column(ARRAY(TEXT)))
     price: float | None = Field(default=None)
@@ -16,6 +20,9 @@ class Matrip(SQLModel, table=True):
     public_rating: float | None = Field(default=None)
     image_url: str | None = Field(default=None)
     sku: str
-    
+    is_active: bool = Field(default=True)
+    points_awarded: int | None = Field(default=None)
+    mzee_id: int | None = Field(default=None, foreign_key="mzee.id")
+    mzee: "Mzee" = Relationship(back_populates="matrips")
 
     

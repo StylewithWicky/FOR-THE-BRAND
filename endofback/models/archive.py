@@ -37,5 +37,5 @@ class FinanceArchive(SQLModel, table=True):
     amount: float
     description: str
     reference_id: str  
-    payment_method: str # "M-PESA", "CASH", "BANK"
+    payment_method: str 
     mpesa_code: Optional[str] = Field(unique=True)

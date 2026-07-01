@@ -107,4 +107,11 @@ def seed_initial_data():
 
 def get_session():
     with Session(engine) as session:
-        yield session
+        try:
+            yield session
+            session.commit() 
+        except Exception:
+            session.rollback() 
+            raise
+        finally:
+            session.close()

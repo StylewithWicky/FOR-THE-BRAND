@@ -1,76 +1,62 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import ipaddress
 from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks
 from sqlmodel import Session, select
 from auth.database import get_session
-from models.madoo import MadooInteraction, Invoice
+from auth.deps import get_current_user
+from models.msee import Mzee
+from models.madoo import Invoice, MadooInteraction, InvoiceSchema, FinanceRecord
 from service.madoo import MpesaService
-from service.notifications import send_receipt_email  
+from service.notifications import send_receipt_email
 from config import settings
+from typing import List
 
 router = APIRouter()
 mpesa_service = MpesaService()
 
-def verify_safaricom_origin(ip_string: str) -> bool:
-    if ip_string in ["127.0.0.1", "localhost"]:
-        return True
-    try:
-        client_ip = ipaddress.ip_address(ip_string)
-        for subnet_str in settings.safaricom_subnets:
-            if client_ip in ipaddress.ip_network(subnet_str, strict=False):
-                return True
-        return False
-    except ValueError:
-        return False
+
+@router.get("/invoices", response_model=List[InvoiceSchema])
+def list_invoices(
+    session: Session = Depends(get_session),
+    current_user: Mzee = Depends(get_current_user)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+    return session.exec(select(Invoice)).all()
+
 
 @router.post("/push", status_code=status.HTTP_202_ACCEPTED)
 async def trigger_payment_push(
-    invoice_id: str,
+    invoice_id: int,
     invoice_number: str,
     phone_number: str,
-    amount: int,
-    session: Session = Depends(get_session)
+    amount: float, 
+    session: Session = Depends(get_session),
+    current_user: Mzee = Depends(get_current_user)
 ):
-   
-    db_invoice = session.exec(select(Invoice).where(Invoice.id == invoice_id)).first()
-    
+    db_invoice = session.get(Invoice, invoice_id)
     if not db_invoice:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found.")
+
+    response_data = mpesa_service.send_stk_push(phone_number, amount, invoice_number)
+    if response_data.get("ResponseCode") != "0":
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Invoice with ID '{invoice_id}' does not exist. Please create the invoice before initiating payment."
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Safaricom rejected the request."
         )
 
-  
-    response_data = mpesa_service.send_stk_push(
-        phone_number=phone_number, 
-        amount=amount, 
-        invoice_num=invoice_number
-    )
-
-    merchant_id = response_data.get("MerchantRequestID")
-    checkout_id = response_data.get("CheckoutRequestID")
-    response_code = response_data.get("ResponseCode")
-
-    if response_code != "0":
-        raise HTTPException(status_code=400, detail="Safaricom rejected the push initiation configuration.")
-
-    
     txn = MadooInteraction(
         invoice_id=db_invoice.id,
         phone_number=phone_number,
         amount=amount,
-        merchant_request_id=merchant_id,
-        checkout_request_id=checkout_id,
+        merchant_request_id=response_data.get("MerchantRequestID"),
+        checkout_request_id=response_data.get("CheckoutRequestID"),
         status="PENDING"
     )
     session.add(txn)
     session.commit()
+    return {"status": "PUSH_INITIATED", "checkout_request_id": txn.checkout_request_id}
 
-    return {
-        "status": "PUSH_INITIATED",
-        "merchant_request_id": merchant_id,
-        "checkout_request_id": checkout_id
-    }
 
 @router.post("/callback")
 async def mpesa_async_callback(
@@ -78,57 +64,81 @@ async def mpesa_async_callback(
     background_tasks: BackgroundTasks,  
     session: Session = Depends(get_session)
 ):
-    forwarded_for = request.headers.get("X-Forwarded-For")
-    if forwarded_for:
-        client_ip = forwarded_for.split(",")[0].strip()
-    else:
-        client_ip = request.headers.get("X-Real-IP") or (request.client.host if request.client else "UNKNOWN_IP")
-
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    client_ip = forwarded_for.split(",")[0].strip() if forwarded_for else (request.client.host if request.client else "127.0.0.1")
+    
     if not verify_safaricom_origin(client_ip):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Callback origin untrusted.")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Untrusted origin.")
 
     payload = await request.json()
-    
     stk_callback = payload.get("Body", {}).get("stkCallback", {})
     result_code = stk_callback.get("ResultCode")
-    result_desc = stk_callback.get("ResultDesc")
     checkout_id = stk_callback.get("CheckoutRequestID")
 
-    statement = select(MadooInteraction).where(MadooInteraction.checkout_request_id == checkout_id)
-    txn = session.exec(statement).first()
-
+    txn = session.exec(select(MadooInteraction).where(MadooInteraction.checkout_request_id == checkout_id)).first()
     if not txn:
-        return {"Status": "Handshake signature mismatch, event ignored"}
+        return {"Status": "Handshake mismatch"}
+    if txn.status != "PENDING":
+        return {"ResultCode": 0, "ResultDesc": "Already processed"}
 
-    txn.result_code = result_code
-    txn.result_desc = result_desc
-    txn.updated_at = datetime.utcnow()
+    try:
+        txn.result_code = result_code
+        txn.result_desc = stk_callback.get("ResultDesc")
+        txn.updated_at = datetime.now(timezone.utc)
 
-    if result_code == 0:
-        meta_items = stk_callback.get("CallbackMetadata", {}).get("Item", [])
-        receipt = next((item.get("Value") for item in meta_items if item.get("Name") == "MpesaReceiptNumber"), None)
-        
-        txn.status = "SUCCESS"
-        txn.mpesa_receipt = receipt
-        
-        invoice = session.exec(select(Invoice).where(Invoice.id == txn.invoice_id)).first()
-        if invoice:
-            invoice.status = "PAID"
-            invoice.updated_at = datetime.utcnow()
-            session.add(invoice)
+        if result_code == 0:
+            meta_items = stk_callback.get("CallbackMetadata", {}).get("Item", [])
+            receipt = next((i.get("Value") for i in meta_items if i.get("Name") == "MpesaReceiptNumber"), None)
             
-            if hasattr(invoice, 'owner_email') and invoice.owner_email:
-                background_tasks.add_task(
-                    send_receipt_email,
-                    recipient_email=invoice.owner_email,
-                    invoice_num=invoice.invoice_number,
+            txn.status = "SUCCESS"
+            txn.mpesa_receipt = receipt
+            
+            invoice = session.get(Invoice, txn.invoice_id)
+            if invoice:
+                invoice.status = "PAID"
+                revenue = FinanceRecord(
+                    event_id=invoice.event_id,
+                    category="CLIENT_PAYMENT",
+                    transaction_type="REVENUE",
                     amount=txn.amount,
-                    receipt_num=receipt
+                    invoice_id=invoice.id
                 )
-    else:
-        txn.status = "FAILED"
+                session.add(revenue)
+                session.add(invoice)
 
-    session.add(txn)
-    session.commit()
-    
-    return {"ResultCode": 0, "ResultDesc": "Callback processed smoothly"}
+                if invoice.owner_email:
+                    background_tasks.add_task(
+                        send_receipt_email, 
+                        invoice.owner_email, 
+                        invoice.invoice_number, 
+                        txn.amount, 
+                        receipt
+                    )
+        else:
+            txn.status = "FAILED"
+
+        session.add(txn)
+        session.commit()
+        
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=f"Callback processing crash sequence: {str(e)}"
+        )
+        
+    return {"ResultCode": 0, "ResultDesc": "Success"}
+
+
+def verify_safaricom_origin(ip_string: str) -> bool:
+    if ip_string in ["127.0.0.1", "localhost"]: 
+        return True
+    try:
+        client_ip = ipaddress.ip_address(ip_string)
+        subnets = getattr(settings, "safaricom_subnets", [])
+        for subnet_str in subnets:
+            if client_ip in ipaddress.ip_network(subnet_str, strict=False): 
+                return True
+        return False
+    except ValueError: 
+        return False
