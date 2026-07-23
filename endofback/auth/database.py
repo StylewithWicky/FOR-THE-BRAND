@@ -20,7 +20,6 @@ def create_db_and_tables():
 
 def seed_initial_data():
     with Session(engine) as session:
-        # --- Mzee (Admin) ---
         admin_email = os.getenv("ADMIN_EMAIL")
         admin_username = os.getenv("ADMIN_USERNAME")
         raw_admin_password = os.getenv("ADMIN_PASSWORD")

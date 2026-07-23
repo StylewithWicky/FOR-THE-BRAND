@@ -9,7 +9,7 @@ SECRET_KEY = os.getenv("MASTEROFSECRETS")
 ALGORITHM = os.getenv("RANDOMNUMBER")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Using | None instead of Optional
+# 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     

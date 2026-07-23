@@ -36,11 +36,12 @@ from models.system import SystemConfig, SecurityAudit
 from models.madoo import Invoice, MadooInteraction
 from models.MasterBooking import MasterBooking, ChatHistory
 from models.content import Post, Blog as BlogModel
+from models.Kubook import Kubook as KubookModel
 
 from routes import (
     msee, events, shops, trips, collaborater, 
     audit, logbook, archive, system, madoo, 
-    security, masanse_comands, Brandy ,Blog as BlogRouter
+    security, masanse_comands, Brandy ,Blog as BlogRouter,Kubook 
 )
 from middleware.masanse import AutomatedFirewallMiddleware
 
@@ -58,7 +59,7 @@ for model in [
     Mzee, Sherehe, Merch, Matrip, Mamorio, AuditLog, LogEntry, 
     FinanceArchive, TripArchive, VenueArchive, SystemConfig, 
     SecurityAudit, Invoice, MadooInteraction, MasterBooking, ChatHistory, TripLogistics,
-    Post, BlogModel
+    Post, BlogModel ,KubookModel
 ]:
     model.model_rebuild()
 
@@ -108,6 +109,7 @@ app.include_router(masanse_comands.router, prefix="/api/v1/masanse", tags=["Masa
 app.include_router(Brandy.router, prefix="/api/v1/Brandy", tags=["Brandy AI"])
 app.include_router(events.router, prefix="/api/v1/logistics", tags=["Logistics"],dependencies=[Depends(get_current_admin)])
 app.include_router(BlogRouter.router, prefix="/api/v1/blog", tags=["Blog"])
+app.include_router(Kubook.router, prefix="/api/v1/bookings", tags=["Bookings"])
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Global error caught: {str(exc)}", exc_info=True)

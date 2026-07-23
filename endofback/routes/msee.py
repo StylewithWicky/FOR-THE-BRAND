@@ -22,16 +22,13 @@ router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/msee/login")
 
-# --- Helper Utilities ---
 def get_admin_emails() -> Set[str]:
-    """Helper to parse admin emails cleanly from system environment settings."""
     try:
         raw_emails = json.loads(os.getenv("ADMIN_EMAIL", "[]"))
         return {str(email).strip().lower() for email in raw_emails}
     except Exception:
         return set()
 
-# --- Schemas ---
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -68,7 +65,6 @@ def register_mzee(user_in: SignupRequest, session: Session = Depends(get_session
         is_admin=False
     )
     
-    # Check if this signing-up email is a designated bootstrap admin
     if email_clean in get_admin_emails():
         new_user.is_admin = True
 

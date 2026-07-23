@@ -4,6 +4,7 @@ import datetime
 from sqlalchemy import Column, ARRAY, TEXT
 if TYPE_CHECKING:
     from models.msee import Mzee
+    from models.Kubook import Kubook
 
 
 class Matrip(SQLModel, table=True):
@@ -21,8 +22,10 @@ class Matrip(SQLModel, table=True):
     image_url: str | None = Field(default=None)
     sku: str
     is_active: bool = Field(default=True)
+    is_public: bool = Field(default=True)   
     points_awarded: int | None = Field(default=None)
     mzee_id: int | None = Field(default=None, foreign_key="mzee.id")
     mzee: "Mzee" = Relationship(back_populates="matrips")
+    kubooks: List["Kubook"] = Relationship(back_populates="trip")
 
     

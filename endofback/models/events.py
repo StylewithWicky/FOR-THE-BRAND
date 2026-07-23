@@ -4,6 +4,7 @@ import datetime
 from sqlalchemy import Column, ARRAY, TEXT
 if TYPE_CHECKING:
     from models.MasterBooking import MasterBooking
+    from models.Kubook import Kubook
 
 class Sherehe(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -22,6 +23,7 @@ class Sherehe(SQLModel, table=True):
     package_details: Optional[str] = None
     hotel_cost: Optional[float] = None
     is_archived: bool = Field(default=False)
+    kubooks: List["Kubook"] = Relationship(back_populates="sherehe")
     
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     logistics: List["TripLogistics"] = Relationship(back_populates="sherehe")

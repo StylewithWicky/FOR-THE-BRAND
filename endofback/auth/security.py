@@ -1,4 +1,4 @@
-import bcrypt # Import the direct library
+import bcrypt 
 from datetime import datetime, timedelta, UTC
 from jose import jwt
 from dotenv import load_dotenv, find_dotenv
@@ -11,7 +11,6 @@ ALGORITHM = os.getenv("RANDOMNUMBER")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def hash_password(password: str) -> str:
-    # Convert string to bytes
     pwd_bytes = password.encode('utf-8')
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(pwd_bytes, salt)

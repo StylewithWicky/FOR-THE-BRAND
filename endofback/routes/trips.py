@@ -15,13 +15,11 @@ router = APIRouter()
 def create_public_trip(
     trip_in: MatripCreate,  
     session: Session = Depends(get_session),
-    current_user: Mzee = Depends(get_current_user)  # Restrict to authenticated users to mitigate spam vectors
+    current_user: Mzee = Depends(get_current_user)  
 ):
     try:
         new_trip = Matrip.model_validate(trip_in)
         new_trip.is_active = True 
-        
-        # Enforce uniform casing consistency on metadata boundaries
         if new_trip.package_type:
             new_trip.package_type = new_trip.package_type.strip().lower()
             
@@ -52,8 +50,7 @@ def list_trips(
     limit: int = 20, 
     session: Session = Depends(get_session)
 ):
-    # Restrict data retrieval feeds to ignore archived/soft-deleted lines
-    statement = select(Matrip).where(Matrip.is_active == True)
+    statement = select(Matrip).where(Matrip.is_public == True)
     
     if type: 
         statement = statement.where(Matrip.package_type == type.strip().lower())
