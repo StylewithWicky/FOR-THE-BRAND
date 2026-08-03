@@ -20,7 +20,8 @@ export default function BookingsAndEvents() {
     hotel_cost: '',
     contact_person: '',
     contact_phone: '',
-    package_details: ''
+    package_details: '',
+    image: ''
   });
 
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ export default function BookingsAndEvents() {
       setFormData({
         name: '', description: '', date: '', location: '', activities: '',
         price: '', hotel_name: '', hotel_cost: '', contact_person: '',
-        contact_phone: '', package_details: ''
+        contact_phone: '', package_details: '',image:''
       });
       fetchEvents();
     } catch (err) {
@@ -193,16 +194,21 @@ export default function BookingsAndEvents() {
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Date *</label>
                     <input type="date" name="date" required value={formData.date} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Location *</label>
-                    <input type="text" name="location" required value={formData.location} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="e.g., Naivasha" />
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Location *</label>
+                      <input type="text" name="location" required value={formData.location} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="e.g., Naivasha" />
+                    </div>
                   </div>
-                </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Description / Activities</label>
                   <textarea name="description" rows={2} value={formData.description} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors resize-none" placeholder="Details about the setup..." />
                 </div>
               </div>
+              <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Location *</label>
+                    <input type="file" name="image" required value={formData.image} onChange={handleInputChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="e.g., Naivasha" />
+                  </div>
+                
 
               {/* Hospitality Section */}
               <div className="space-y-3 pt-2">
