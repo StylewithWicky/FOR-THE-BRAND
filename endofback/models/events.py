@@ -8,6 +8,13 @@ if TYPE_CHECKING:
     from models.MasterBooking import MasterBooking
     from models.Kubook import Kubook
     from images import Image
+    
+    
+class ShereheCategory(str):
+    Calm: str = "calm"
+    Mid: str = "mid"
+    Adrenaline: str = "adrenaline"
+    
 
 class Sherehe(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
