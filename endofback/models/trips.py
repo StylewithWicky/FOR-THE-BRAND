@@ -6,7 +6,10 @@ if TYPE_CHECKING:
     from models.msee import Mzee
     from models.Kubook import Kubook
 
-
+class TripCategory(str):
+    mainland = "mainland"
+    local = "localpackages"
+    international = "international"
 class Matrip(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
