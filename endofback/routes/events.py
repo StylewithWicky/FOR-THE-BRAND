@@ -94,8 +94,9 @@ def create_event(
     for image in images:
           
         if image.filename:
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            safe_filename = f"{timestamp}_{image.filename}"
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            modified_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            safe_filename = f"{timestamp}_{image.filename}_{modified_at}"
             file_path = os.path.join(upload_dir, safe_filename)
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
