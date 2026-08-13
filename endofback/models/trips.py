@@ -5,6 +5,7 @@ from sqlalchemy import Column, ARRAY, TEXT
 if TYPE_CHECKING:
     from models.msee import Mzee
     from models.Kubook import Kubook
+    from images import Image
 
 class TripCategory(str):
     mainland = "mainland"
@@ -30,5 +31,7 @@ class Matrip(SQLModel, table=True):
     mzee_id: int | None = Field(default=None, foreign_key="mzee.id")
     mzee: "Mzee" = Relationship(back_populates="matrips")
     kubooks: List["Kubook"] = Relationship(back_populates="trip")
+    images: List["Image"] = Relationship(back_populates="matrip", lazy="selectin")
+    
 
     

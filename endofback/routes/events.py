@@ -90,18 +90,7 @@ def create_event(
     if image and len(images) < 3:
         raise HTTPException(status_code=400, detail="You have to upload at least 3 images.")
              
-    image_path = []
-    for image in images:
-          
-        if image.filename:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            modified_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            safe_filename = f"{timestamp}_{image.filename}_{modified_at}"
-            file_path = os.path.join(upload_dir, safe_filename)
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
-            
-            image_path.append(file_path)
+    
     
     new_event = Sherehe(
         name=name,
@@ -118,7 +107,19 @@ def create_event(
         package_details=package_details,
         hotel_cost=hotel_cost
     )
-    
+    image_path = []
+    for image in images:
+              
+        if image.filename:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                modified_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                safe_filename = f"{timestamp}_{image.filename}_{modified_at}"
+                file_path = os.path.join(upload_dir, safe_filename)
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(image.file, buffer)
+                
+                image_path.append(file_path)
+                
     session.add(new_event)
     session.flush() 
     session.commit()

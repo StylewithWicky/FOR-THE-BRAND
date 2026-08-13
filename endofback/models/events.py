@@ -1,3 +1,5 @@
+
+
 from sqlmodel import Relationship, SQLModel, Field
 from typing import TYPE_CHECKING, List, Optional
 import datetime 
@@ -5,6 +7,7 @@ from sqlalchemy import Column, ARRAY, TEXT
 if TYPE_CHECKING:
     from models.MasterBooking import MasterBooking
     from models.Kubook import Kubook
+    from images import Image
 
 class Sherehe(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -24,6 +27,7 @@ class Sherehe(SQLModel, table=True):
     hotel_cost: Optional[float] = None
     is_archived: bool = Field(default=False)
     kubooks: List["Kubook"] = Relationship(back_populates="sherehe")
+    images: List["Image"] = Relationship(back_populates="sherehe", lazy="selectin")
     
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     logistics: List["TripLogistics"] = Relationship(back_populates="sherehe")
