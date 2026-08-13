@@ -59,7 +59,7 @@ def read_active_logistics(
     return active_trips
 
 
-@router.post("/", response_model=MashereheSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=MashereheSchema, status_code=status.HTTP_201_CREATED)
 def create_event(
     event_in: MashereheCreate,
     session: Session = Depends(get_session),

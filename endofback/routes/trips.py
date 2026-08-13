@@ -71,7 +71,7 @@ def get_trip_details(trip_id: int, session: Session = Depends(get_session)):
     return trip
 
 
-@router.post("/", response_model=MatripSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=MatripSchema, status_code=status.HTTP_201_CREATED)
 def create_new_trip(
     trip_in: MatripCreate, 
     session: Session = Depends(get_session),

@@ -7,6 +7,7 @@ export default function BookingsAndEvents() {
   const [events, setEvents] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [trips, setTrips] = useState<any[]>([]);
   
   // Form State for Eka Kitu
   const [formData, setFormData] = useState({
@@ -38,6 +39,14 @@ export default function BookingsAndEvents() {
   useEffect(() => { 
     fetchEvents(); 
   }, []);
+  const fetchTrips = async () => {
+    try{
+        const response = await axiosClient.get('/trip/active');
+        setTrips(response.data);
+    } catch (err) {
+        console.error("Error fetching trips:", err);
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -48,7 +57,7 @@ export default function BookingsAndEvents() {
     e.preventDefault();
     setLoading(true);
     try {
-      // Transforming string values to numeric types where your backend expects it
+      
       const payload = {
         ...formData,
         price: parseFloat(formData.price) || 0,
@@ -56,7 +65,8 @@ export default function BookingsAndEvents() {
         date: new Date(formData.date).toISOString()
       };
       
-      await axiosClient.post('/sherehe/mkubwa/zote', payload); // Adjust endpoint if creation URL differs
+      await axiosClient.post('/sherehe/create', payload);
+      await axiosClient.post('/trip/create', { transport_means: formData.activities, driver_charge: parseFloat(formData.price) || 0 }); 
       setShowModal(false);
       // Reset Form
       setFormData({
@@ -103,7 +113,7 @@ export default function BookingsAndEvents() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {events.length === 0 ? (
           <div className="lg:col-span-2 text-center py-20 bg-white border border-dashed border-slate-200 rounded-3xl text-slate-400 font-medium text-sm">
-            Hakuna sherehe zilizopatikana. Gusa 'Eka Kitu' kuongeza.
+            Unaona kitu bro . 'Eka Kitu' .
           </div>
         ) : (
           events.map(event => {
@@ -182,7 +192,6 @@ export default function BookingsAndEvents() {
             {/* Modal Content / Form */}
             <form onSubmit={handleSubmit} className="p-6 flex-1 space-y-5">
               
-              {/* Basic Section */}
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b pb-1">1. Event Basics</p>
                 <div>
