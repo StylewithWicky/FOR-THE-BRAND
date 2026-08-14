@@ -11,6 +11,7 @@ class TripCategory(str):
     mainland = "mainland"
     local = "localpackages"
     international = "international"
+    
 class Matrip(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
@@ -22,11 +23,10 @@ class Matrip(SQLModel, table=True):
     activities: List[str] | None = Field(default=None, sa_column=Column(ARRAY(TEXT)))
     price: float | None = Field(default=None)
     capacity: int | None = Field(default=None)
-    public_rating: float | None = Field(default=None)
-    image_url: str | None = Field(default=None)
     sku: str
     is_active: bool = Field(default=True)
     is_public: bool = Field(default=True)   
+    
     points_awarded: int | None = Field(default=None)
     mzee_id: int | None = Field(default=None, foreign_key="mzee.id")
     mzee: "Mzee" = Relationship(back_populates="matrips")

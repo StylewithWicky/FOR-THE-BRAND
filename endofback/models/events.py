@@ -21,6 +21,7 @@ class Sherehe(SQLModel, table=True):
     name: str
     description: str | None = Field(default=None)
     date: datetime.datetime 
+    category: ShereheCategory = Field(default=ShereheCategory.mid)
     location: str
     activities: List[str] | None = Field(default=None, sa_column=Column(ARRAY(TEXT)))
     price: float | None = Field(default=None)

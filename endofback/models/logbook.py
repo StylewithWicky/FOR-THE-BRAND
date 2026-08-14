@@ -19,4 +19,4 @@ class LogEntry(SQLModel, table=True):
     end_time: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.now)
     created_by: str 
-    master_booking: "MasterBooking" = Relationship(back_populates="logs")
+    master_booking: "MasterBooking" = Relationship(back_populates="logs", lazy='selectin')
