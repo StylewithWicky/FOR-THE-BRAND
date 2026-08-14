@@ -27,11 +27,14 @@ export default function ThingsToDo() {
   const textParallax = useTransform(scrollYProgress, [0, 0.25], [0, -40]);
 
   useEffect(() => {
-    const fetchBackendDayTrips = async () => {
+    const fetchBackendDayTrips = async (selectedCategory= '') => {
       try {
         setLoading(true);
         const API_BASE = (import.meta as any).env.VITE_API_URL;
-        const response = await fetch(`${API_BASE}/sherehe/`);
+        const url = selectedCategory 
+      ? `${API_BASE}/sherehe/?category=${selectedCategory}` 
+      : `${API_BASE}/sherehe/`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Dropped sherehe frame stack");
         
         const data = await response.json();
@@ -40,13 +43,13 @@ export default function ThingsToDo() {
           const loc = (item.location || '').toLowerCase();
           const name = (item.name || '').toLowerCase();
           
-          if (loc.includes('kilifi') || loc.includes('lamu') || name.includes('chill') || name.includes('sunset')) {
-            energyScore = 25;
-          } else if (loc.includes('nairobi') || name.includes('club') || name.includes('circuit')) {
-            energyScore = 65;
-          } else if (loc.includes('crater') || loc.includes('rift') || name.includes('hike') || name.includes('safari')) {
-            energyScore = 85;
-          }
+      if (item.category === 'calm') {
+        energyScore = 25;
+      } else if (item.category === 'mid') {
+        energyScore = 65;
+      } else if (item.category === 'adrenaline') {
+        energyScore = 85;
+      }
 
           return {
             title: item.name || "Untitled Form",
@@ -112,7 +115,7 @@ export default function ThingsToDo() {
       {/* FILTER SECTION */}
       <section className="py-20 max-w-4xl mx-auto px-8 text-center space-y-8">
         <div className="space-y-2">
-          <h3 className="text-xl font-serif tracking-wide">Choose your own Sherehe Vibe</h3>
+          <h3 className="text-xl font-serif tracking-wide">Choose your own Vibe</h3>
           <p className="text-xs text-slate-500 font-mono uppercase tracking-wider">Slide the line to choose your preferred vibe</p>
         </div>
         <div className="bg-white/[0.02] border border-white/5 p-8 rounded-[32px] space-y-6 shadow-2xl">
@@ -131,7 +134,7 @@ export default function ThingsToDo() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
-            <div className="text-sm font-mono text-zinc-500 animate-pulse">Scanning database...</div>
+            <div className="text-sm font-mono text-zinc-500 animate-pulse">Scanning ...</div>
           ) : filteredExperiences.map((exp, idx) => (
             <div key={`${exp.title}-${idx}`} className="bg-[#101114] border border-white/5 h-[480px] rounded-[48px] p-10 flex flex-col justify-between shadow-2xl hover:border-amber-500/20 transition-all duration-300 group">
               <div>
