@@ -9,8 +9,10 @@ if TYPE_CHECKING:
 
 class TripCategory(str):
     mainland = "mainland"
-    local = "localpackages"
     international = "international"
+    east-african='east-africa'
+    safari='safari'
+    coastal = "coastal"
     
 class Matrip(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -26,7 +28,7 @@ class Matrip(SQLModel, table=True):
     sku: str
     is_active: bool = Field(default=True)
     is_public: bool = Field(default=True)   
-    
+    category: TripCategory = Field(default=TripCategory.mainland)
     points_awarded: int | None = Field(default=None)
     mzee_id: int | None = Field(default=None, foreign_key="mzee.id")
     mzee: "Mzee" = Relationship(back_populates="matrips")

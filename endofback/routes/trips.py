@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException,Query,status, Response
 from sqlmodel import Session, select
 from typing import List
 from models.MasterBooking import MasterBooking
-from models.trips import Matrip
+from models.trips import Matrip, TripCategory
 from schema.trips import MatripCreate, MatripSchema, MatripUpdate
 from auth.database import get_session
 from auth.deps import get_current_user
@@ -37,9 +37,17 @@ def create_public_trip(
 
 
 @router.get("/active", response_model=List[MatripSchema])
-def get_active_trips(session: Session = Depends(get_session)):
-    statement = select(Matrip).where(Matrip.is_active == True)
-    return session.exec(statement).all()
+def get_trips(
+    type: TripCategory | None = Query(default=None, description="Filter trips by category type"),
+    session: Session = Depends(get_session)
+):
+    statement = select(Matrip).where(Matrip.is_active == True, Matrip.is_public == True)
+    
+    if type:
+        statement = statement.where(Matrip.category == type)
+        
+    trips = session.exec(statement).all()
+    return trips
 
 
 @router.get("/", response_model=List[MatripSchema])

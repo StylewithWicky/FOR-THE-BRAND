@@ -23,7 +23,15 @@ export default function PlacesToGo() {
   const videoSourcePrimary = "/videos/beech.mp4";
   const videoSourceFallback = "/videos/relaxs.mp4";
 
-  const regions: string[] = ['Mainland packages', 'International Packages', 'Coastal packages'];
+
+  const regionMap: { [key: string]: string } = {
+    'East Africa packages': 'east-africa',
+    'International Packages': 'international',
+    'Coastal packages': 'coastal',
+    'Safari packages': 'safari',
+    'Mainland packages': 'mainland'
+  }
+  const regions: string[] = Object.keys(regionMap);
   const [currentRegion, setCurrentRegion] = useState<string>('Mainland packages');
 
   const { scrollYProgress } = useScroll({
@@ -41,11 +49,8 @@ export default function PlacesToGo() {
       setError(null);
       try {
         const API_BASE = (import.meta.env.VITE_API_URL as string);
-        let endpoint = `${API_BASE}/trips/`;
-        
-        if (currentRegion === 'Coastal packages') endpoint = `${API_BASE}/trips/?type=coastal`;
-        else if (currentRegion === 'International Packages') endpoint = `${API_BASE}/trips/?type=international`;
-
+        const categoryKey = regionMap[currentRegion] || 'mainland';
+        const endpoint = `${API_BASE}/trips/?type=${categoryKey}`;
         const response = await fetch(endpoint, {
           method: 'GET',
           headers: {
