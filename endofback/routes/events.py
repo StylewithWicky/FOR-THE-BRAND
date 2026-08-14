@@ -1,10 +1,10 @@
 import shutil
 
-from fastapi import APIRouter, Depends, HTTPException, status, Body, Form, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Body, Form, UploadFile, File
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
 from typing import List, Optional
-from models.events import Sherehe, TripLogistics
+from models.events import Sherehe, TripLogistics,ShereheCategory
 from schema import events
 from schema.events import MashereheCreate, MashereheSchema, MashereheUpdate, PublicMashereheSchema
 from auth.database import get_session
@@ -26,13 +26,6 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # 1. STATIC PATHS (Evaluated FIRST)
 # ==========================================
 
-@router.get("/", response_model=List[PublicMashereheSchema])
-def read_events(
-    offset: int = 0,
-    limit: int = 20,
-    session: Session = Depends(get_session)
-):
-    return session.exec(select(Sherehe).where(Sherehe.is_archived == False).offset(offset).limit(limit)).all()
 
 
 @router.get("/mkubwa/zote", response_model=List[MashereheSchema])
@@ -134,10 +127,18 @@ def create_event(
 # ==========================================
 
 @router.get("/{event_id}", response_model=PublicMashereheSchema)
-def read_event(event_id: int, session: Session = Depends(get_session)):
-    event = session.get(Sherehe, event_id)
-    if not event or event.is_archived:
+def read_event(event_id: int,session: Session = Depends(get_session),category:ShereheCategory | None=Query(default=None ,description='Filter by category')):
+    statement = select(Sherehe).where(Sherehe.id == event_id, Sherehe.is_archived == False)
+   
+    if category:
+        statement = statement.where(Sherehe.category == category)
+    statement = statement.options(selectinload(Sherehe.logistics))
+    
+    event = session.exec(statement).first()
+    
+    if not event:
         raise HTTPException(status_code=404, detail="Sherehe not found")
+        
     return event
 
 
