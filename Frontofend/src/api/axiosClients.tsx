@@ -5,7 +5,7 @@ const API_BASE_URL = (import.meta.env.VITE_API_URL as string);
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'multipart/form-data'},
 });
 
 axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
