@@ -9,6 +9,6 @@ class Image(SQLModel, table=True):
     url: str
     event_id: int | None = Field(default=None, foreign_key="sherehe.id")
     trip_id: int | None = Field(default=None, foreign_key="matrip.id")
-    sherehe: "Sherehe" = Relationship(back_populates="images", lazy="selectin")
-    matrip: "Matrip" = Relationship(back_populates="images", lazy="selectin")
+    sherehe: "Sherehe" = Relationship(back_populates="images", sa_relationship_kwargs={"lazy": "selectin"})
+    matrip: "Matrip" = Relationship(back_populates="images", sa_relationship_kwargs={"lazy": "selectin"})
  

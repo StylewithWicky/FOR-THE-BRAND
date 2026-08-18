@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from requests import request, session
+
 from sqlmodel import Session, select
 from auth.database import get_session
 from auth.deps import get_current_user 

@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException,Query,status, Response
+import shutil
+import os
+from fastapi import APIRouter, Depends, HTTPException,Query,status, Response,Form, UploadFile, File
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 from models.MasterBooking import MasterBooking
 from models.trips import Matrip, TripCategory
 from schema.trips import MatripCreate, MatripSchema, MatripUpdate
@@ -9,6 +12,8 @@ from auth.deps import get_current_user
 from models.msee import Mzee
 
 router = APIRouter()
+upload_dir = "uploads"
+os.makedirs(upload_dir, exist_ok=True)
 
 
 @router.post('/public-create', response_model=MatripSchema, status_code=status.HTTP_201_CREATED)
@@ -81,24 +86,76 @@ def get_trip_details(trip_id: int, session: Session = Depends(get_session)):
 
 @router.post("/create", response_model=MatripSchema, status_code=status.HTTP_201_CREATED)
 def create_new_trip(
-    trip_in: MatripCreate, 
-    session: Session = Depends(get_session),
-    current_user: Mzee = Depends(get_current_user)
-):
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Forbidden: Admin access required for fleet management"
-        )
-    
-    new_trip = Matrip.model_validate(trip_in)
-    if new_trip.package_type:
-        new_trip.package_type = new_trip.package_type.strip().lower()
+        name: str = Form(...),
+        description: Optional[str] = Form(None),
+        start_date: datetime = Form(...),
+        end_date: datetime = Form(None),
+        package_type: str = Form(...),
+        activities: Optional[List[str]] = Form(None),
+        location: str = Form(...),
+        capacity: Optional[int] = Form(None),
+        price: Optional[float] = Form(None),
+        category: TripCategory = Form(...),
+        sku: Optional[str] = Form(None),
+        hotel_name: Optional[str] = Form(None),
+        contact_person: Optional[str] = Form(None),
+        contact_phone: Optional[str] = Form(None),
+        package_details: Optional[str] = Form(None),
+        hotel_cost: Optional[float] = Form(None),
+        images: List[UploadFile] = File(default=[]),
         
-    session.add(new_trip)
-    session.commit()
-    session.refresh(new_trip)
-    return new_trip
+        
+        session: Session = Depends(get_session),
+        current_user: Mzee = Depends(get_current_user)
+    ):
+        if not current_user.is_admin:
+            raise HTTPException(status_code=403, detail="Not authorized")
+            
+       
+        if len(images) > 5:
+            raise HTTPException(status_code=400, detail="You can upload a maximum of 5 images.")
+        if len(images) < 3:
+            raise HTTPException(status_code=400, detail="You have to upload at least 3 images.")
+                 
+        
+        image_paths = []
+        for image in images:
+            if image.filename:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                modified_at = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+                safe_filename = f"{timestamp}_{image.filename}"
+                file_path = os.path.join(upload_dir, safe_filename)
+                
+                os.makedirs(upload_dir, exist_ok=True)
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(image.file, buffer)
+                    
+                image_paths.append(file_path)
+                 
+        new_trip = Matrip(
+            name=name,
+            description=description,
+            start_date=start_date,
+            end_date=end_date,
+            location=location,
+            price=price,
+            sku=sku,
+            hotel_name=hotel_name,
+            contact_person=contact_person,
+            contact_phone=contact_phone,
+            package_details=package_details,
+            hotel_cost=hotel_cost,
+            package_type=package_type,
+            activities=activities,
+            capacity=capacity,
+            category=category
+        )
+        
+        session.add(new_trip)
+        session.commit()
+        session.refresh(new_trip)
+        
+        return new_trip
 
 
 @router.patch("/{trip_id}", response_model=MatripSchema)
