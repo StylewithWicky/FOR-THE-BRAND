@@ -35,9 +35,9 @@ export const ProtectedNavbar: React.FC<ProtectedNavbarProps> = ({ user, onLogout
             {link.name}
           </Link>
         ))}
-        <Link to="/c2/v1/events" className="border border-amber-500/50 text-amber-500 px-6 py-2.5 rounded-full hover:bg-amber-500 hover:text-black transition-all">
+        {/*<Link to="/c2/v1/events" className="border border-amber-500/50 text-amber-500 px-6 py-2.5 rounded-full hover:bg-amber-500 hover:text-black transition-all">
           Events
-        </Link>
+        </Link>*/}
       </div>
 
       {/* Right Side: Identity & Mobile Toggle */}

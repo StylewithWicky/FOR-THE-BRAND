@@ -22,12 +22,12 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ onSignUpClick }) => 
         <Link to="/c2/v1/experiences" className="hover:text-amber-400 transition-colors">Experiences</Link>
         <Link to="/c2/v1/blog" className="hover:text-amber-400 transition-colors">Blog</Link>
         <Link to="/c2/v1/plan-trip" className="hover:text-amber-400 transition-colors">Plan Your Trip</Link>
-        <Link to="/c2/v1/events" className="bg-amber-500 text-black px-5 py-2.5 rounded-full text-[9px] font-black tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 shadow-xl shadow-amber-500/10">
+        {/*<Link to="/c2/v1/events" className="bg-amber-500 text-black px-5 py-2.5 rounded-full text-[9px] font-black tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 shadow-xl shadow-amber-500/10">
           Events
-        </Link>
+        </Link>*/}
       </div>
 
-      {/* Auxiliary Deck */}
+     
         <div className="flex items-center gap-6 text-slate-400 text-[11px] relative">
         
         

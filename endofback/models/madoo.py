@@ -16,7 +16,7 @@ class Invoice(SQLModel, table=True):
     owner_email: str
     status: str = Field(default="PENDING", index=True)
     event_id: Optional[int] = Field(default=None, foreign_key="sherehe.id") 
-    interactions: List["MadooInteraction"] = Relationship(back_populates="invoice")
+    interactions: List["MadooInteraction"] = Relationship(back_populates="invoice" , sa_relationship_kwargs={"lazy": "selectin"})
 
 class MadooInteraction(SQLModel, table=True):
     __tablename__ = "madoo_interactions"
@@ -27,7 +27,7 @@ class MadooInteraction(SQLModel, table=True):
     checkout_request_id: str = Field(index=True)
     status: str = Field(default="PENDING", index=True)
     mpesa_receipt: Optional[str] = None
-    invoice: Optional[Invoice] = Relationship(back_populates="interactions")
+    invoice: Optional[Invoice] = Relationship(back_populates="interactions", sa_relationship_kwargs={"lazy": "selectin"})
 
 class SecurityLogTable(SQLModel, table=True):
     __tablename__ = "security_log"

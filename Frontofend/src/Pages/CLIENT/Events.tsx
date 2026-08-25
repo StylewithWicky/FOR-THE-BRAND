@@ -9,7 +9,7 @@ export default function EventsPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('/api/v1/events'); // Adjust this path to your FastAPI route
+        const response = await fetch('/api/v1/events'); 
         if (response.ok) {
           const data = await response.json();
           setEvents(data);
@@ -26,7 +26,7 @@ export default function EventsPage() {
     fetchEvents();
   }, []);
 
-  const filteredEvents = filter === 'All Assemblies' 
+  const filteredEvents = filter === 'All Events' 
     ? events 
     : events.filter((e: any) => e.category === filter);
 
