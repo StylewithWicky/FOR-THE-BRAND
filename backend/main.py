@@ -6,6 +6,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
+
 from auth.deps import get_current_admin
 
 
@@ -15,7 +16,7 @@ load_dotenv(dotenv_path=env_path)
 
 if not os.getenv("KEYOFSECRETS"):
     logging.warning("⚠️ SECRET_KEY not detected in the environment. Setting a runtime development fallback.")
-    os.environ["KEYOFSECRETS"] 
+    os.environ["KEYOFSECRETS"]='fallbck_key'
 if not os.getenv("ALGORITHM"):
     os.environ["ALGORITHM"] = "HS256"
     
