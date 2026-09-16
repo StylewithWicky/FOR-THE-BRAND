@@ -28,7 +28,7 @@ export default function MemberDashboard() {
     const initDashboard = async () => {
       try {
         const token = localStorage.getItem('yolo_token');
-        const res = await fetch('/api/v1/msee/dashboard-stats', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/msee/dashboard-stats`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
