@@ -50,7 +50,7 @@ export default function MemberForm({ onSuccess }: MemberFormProps) {
         phone_number: isSignup ? phone.trim() : undefined,
       });
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'An authentication error occurred.');
+      setError(err?.response?.data?.detail || 'An error occurred...Just sit tight and try again later.');
     } finally {
       setSubmitting(false);
     }

@@ -76,8 +76,6 @@ function AppContent() {
       lenis.destroy();
     };
   }, []);
-
-  // 2. AUTHENTICATION SECURITY CHECK Lifecycle Loop
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('yolo_token');

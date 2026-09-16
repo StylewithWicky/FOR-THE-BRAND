@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { authSchema, AuthValues } from "../lib/auth-schema";
-import { s } from "../styles/Auth.styles"; // Consistent with your other files
+import { s } from "../styles/Auth.styles";
 
 interface AuthFormProps {
   onSuccess: (data: AuthValues) => void;
@@ -33,7 +33,7 @@ export default function AuthForm({ onSuccess, buttonText }: AuthFormProps) {
               placeholder="Username" 
               className={s.input} 
             />
-            {errors.username && <p className={s.errorText}>{errors.username.message}</p>}
+            {errors.email && <p className={s.errorText}>{errors.email.message}</p>}
           </div>
         )}
 

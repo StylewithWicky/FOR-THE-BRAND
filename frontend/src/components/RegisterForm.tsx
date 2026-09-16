@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { registerSchema, RegisterValues } from "../lib/auth-schema";
-import { s } from "../styles/Auth.styles"; // Consistent with your other files
+import { s } from "../styles/Auth.styles"; 
 
 export default function RegisterForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterValues>({

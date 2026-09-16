@@ -7,12 +7,11 @@ export default function BookingsAndEvents() {
   const [events, setEvents] = useState<any[]>([]);
   const [trips, setTrips] = useState<any[]>([]);
   
-  // Separate Modal States
+
   const [showEventModal, setShowEventModal] = useState(false);
   const [showTripModal, setShowTripModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Event Form State (Includes category: calm, mid, adrenaline)
   const [eventForm, setEventForm] = useState({
     name: '',
     description: '',
@@ -135,7 +134,7 @@ export default function BookingsAndEvents() {
     }
   };
 
-  // Submit Trip Form with updated backend structure & Images
+ 
   const handleTripSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

@@ -2,10 +2,11 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useNotificationStore } from '../hooks/useNotification';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL as string);
+console.log("Current API Base URL:", API_BASE_URL);
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'multipart/form-data'},
+  headers: { 'Content-Type': 'application/json' },
 });
 
 axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
