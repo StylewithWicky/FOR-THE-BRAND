@@ -4,14 +4,12 @@ import time
 import logging
 from pathlib import Path
 from contextlib import asynccontextmanager
-from dotenv import load_dotenv
+from dotenv import load_dotenv ,find_dotenv
 
 
 from auth.deps import get_current_admin
 
-
-env_path = Path(__file__).resolve().parent / '.env'
-load_dotenv(dotenv_path=env_path)
+load_dotenv(find_dotenv(filename='.env'))
 
 
 if not os.getenv("KEYOFSECRETS"):
@@ -38,11 +36,12 @@ from models.madoo import Invoice, MadooInteraction
 from models.MasterBooking import MasterBooking, ChatHistory
 from models.content import Post, Blog as BlogModel
 from models.Kubook import Kubook as KubookModel
+from seed import seed_initial_data as seed_production_admin
 
 from routes import (
     msee, events, shops, trips, collaborater, 
     audit, logbook, archive, system, madoo, 
-    security, masanse_comands, Brandy ,Blog as BlogRouter,Kubook 
+    security, masanse_comands, Brandy ,Blog as BlogRouter,Kubook,
 )
 from middleware.masanse import AutomatedFirewallMiddleware
 
@@ -53,6 +52,10 @@ logger = logging.getLogger("API_SECURITY")
 async def lifespan(app: FastAPI):
     logger.info("Creating database tables...")
     SQLModel.metadata.create_all(engine)
+    try:
+        seed_production_admin()
+    except Exception as e:
+        print(f"[WARNING] Automated seeding skipped or failed: {e}")
     yield
     logger.info("Shutting down...")
 
